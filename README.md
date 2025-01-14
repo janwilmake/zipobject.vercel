@@ -1,4 +1,5 @@
-> [!CAUTION] > **TODO** Let's do this before forgetting about it. Let's replace uithub core with zipobject.
+> [!CAUTION]
+> [**TODO**] Let's do this before forgetting about it. Let's replace uithub core with zipobject.
 
 - `omitFiles` doesn't work yet in `JSONStreamer`
 - confirm all filters work properly
