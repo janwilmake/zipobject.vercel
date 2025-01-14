@@ -20,6 +20,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
         immutable: immutableQuery === "true",
         zipHeaders: { Authorization: `Bearer ${apiKey}` },
         type: zipType === "tarball" ? "tarball" : "zipball",
+        path: undefined,
       }
     : siteUrl
     ? getZipUrl(siteUrl, apiKey)
@@ -38,13 +39,18 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     });
   }
 
-  const { zipHeaders, zipUrl, immutable, type } = urlParse;
+  const { zipHeaders, zipUrl, immutable, type, path } = urlParse;
   console.log({ zipHeaders, zipUrl, immutable, type });
 
   //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
   const disableCache = url.searchParams.get("disableCache") === "true";
 
-  const allowedPaths = url.searchParams.getAll("allowedPaths");
+  const allowedPathsQuery = url.searchParams.getAll("allowedPaths");
+  const allowedPaths = allowedPathsQuery
+    ? allowedPathsQuery
+    : path
+    ? [path]
+    : undefined;
   const shouldOmitFiles = url.searchParams.get("omitFiles") === "true";
   // only for JSON
   const shouldOmitTree = url.searchParams.get("omitTree") === "true";

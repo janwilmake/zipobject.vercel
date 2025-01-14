@@ -15,6 +15,7 @@ export const getZipUrl = (
       type: ZipType;
       zipHeaders?: { [name: string]: string };
       immutable: boolean;
+      path: string | undefined;
     }
   | { error: string } => {
   console.log({ siteUrl });
@@ -33,7 +34,10 @@ export const getZipUrl = (
   }
 
   if (siteUrl.startsWith("https://github.com/")) {
-    const [owner, repo, page, branch] = url.pathname.slice(1).split("/");
+    const [owner, repo, page, branch, ...pathChunks] = url.pathname
+      .slice(1)
+      .split("/");
+    const path = pathChunks ? pathChunks.join("/") : undefined;
     // parse github URL
     const ref = branch && branch !== "" ? branch : `HEAD`;
     const isPrivate = !!apiKey;
@@ -45,7 +49,7 @@ export const getZipUrl = (
       ? { Authorization: `token ${apiKey}` }
       : undefined;
     const immutable = isValidGitSHA(branch);
-    return { zipHeaders, immutable, zipUrl, type: "zipball" };
+    return { zipHeaders, immutable, zipUrl, type: "zipball", path };
   }
 
   if (siteUrl.startsWith("https://npmjs.com/")) {
@@ -61,6 +65,7 @@ export const getZipUrl = (
       immutable: true,
       type: "tarball",
       zipUrl: `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`,
+      path: undefined,
     };
   }
 
@@ -83,6 +88,7 @@ export const getZipUrl = (
       immutable: true,
       type: "tarball",
       zipUrl: `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`,
+      path: undefined,
     };
   }
   return { error: "URL not supported" };
