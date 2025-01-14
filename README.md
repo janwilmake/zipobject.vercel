@@ -1,3 +1,14 @@
+> [!TODO]
+> TODO:
+
+- `omitFiles` doesn't work yet in `JSONStreamer`
+- confirm all filters work properly
+- Test streaming to a zip and make that work, including binary. This is a crazily useful feature now.
+- Add `objectUrl`, which could do the filter directly from the JSON, and you can turn a fileObject or JSON (with $ref's) into a zip.
+- Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
+
+# ZIPObject
+
 General purpose edge function that extracts any zip into a JSON/YAML object with a focus on cost/efficiency and performance.
 
 Background: For uithub and other work, I need to be capable of extracting gigabytes of data per second cheaply and fast. By making things stream and cache results after computation, we can effectively remove all bottlenecks and have insane speed.
@@ -26,17 +37,9 @@ Improved processing:
 - Shadowrule support (see https://github.com/janwilmake/shadowfs)
 - Support for [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)
 
-TODO:
+# Idea
 
-- `omitFiles` doesn't work yet in `JSONStreamer`
-- confirm all filters work properly
-- Test streaming to a zip and make that work, including binary. This is a crazily useful feature now.
-- Add `objectUrl`, which could do the filter directly from the JSON, and you can turn a fileObject or JSON (with $ref's) into a zip.
-- Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
-
-Then... use `zipobject` in `zipobject.config` and `uithub`. uithub can now move to cloudflare!
-
-After all that, cache layer!
+Instead of open sourcing uithub, why don't I open source this? The thing is a lot of people would then start streaming zips and thus using github as a datastore for their product. This is currently hard. It's a really cool piece of technology, so definitely cool to open source it.
 
 # Performance / Cost: Max $50
 
