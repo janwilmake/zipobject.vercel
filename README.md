@@ -1,5 +1,4 @@
-> [!CAUTION]
-> [**TODO**] Let's do this before forgetting about it. Let's replace uithub core with zipobject.
+> [!CAUTION] > [**TODO**] Let's do this before forgetting about it. Let's replace uithub core with zipobject.
 
 - `omitFiles` doesn't work yet in `JSONStreamer`
 - confirm all filters work properly
@@ -46,7 +45,7 @@ Improved processing (TODO):
 Instead of open sourcing uithub, why don't I open source this? The thing is a lot of people would then start streaming zips and thus using github as a datastore for their product. This is currently hard. It's a really cool piece of technology, so definitely cool to open source it.
 
 > [!WARNING]  
-> This is a warning
+> Could cause lot of competition. But maybe that's what I want.
 
 # Performance / Cost: Max $50
 
