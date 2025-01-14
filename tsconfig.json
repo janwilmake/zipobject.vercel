@@ -1,0 +1,14 @@
+{
+  "files": ["globals.d.ts"],
+
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "moduleResolution": "NodeNext",
+    "target": "ES2015",
+    "lib": ["es2015", "DOM"],
+    "strict": true,
+    "types": ["node"]
+  }
+}

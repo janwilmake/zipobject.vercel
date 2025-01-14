@@ -1,0 +1,147 @@
+import { extract } from "tar-stream";
+import { PassThrough, Readable, Transform } from "node:stream";
+import { createGunzip } from "zlib";
+import { compile } from "./ignore.js";
+import { shouldIncludeFile } from "./shouldIncludeFile.js";
+import * as YAML from "yaml";
+import { FileProcessor } from "./FileProcessor.js";
+import { BallOptions } from "./types.js";
+import { TokenCounter } from "./TokenCounter.js";
+
+// Updated createTarballStream.ts
+export const createTarballStream = async (options: BallOptions) => {
+  const {
+    zipUrl,
+    zipHeaders,
+    disableGenignore,
+    yamlFilter,
+    maxTokens,
+    ...filterOptions
+  } = options;
+
+  // Initialize token counter
+  const tokenCounter = new TokenCounter(maxTokens);
+
+  // Parse YAML filter if provided
+  let yamlParse: any;
+  if (yamlFilter) {
+    try {
+      yamlParse = YAML.parse(yamlFilter);
+    } catch (e: any) {
+      throw new Error(`Invalid YAML filter: ${e.message}`);
+    }
+  }
+
+  const response = await fetch(zipUrl, { headers: zipHeaders });
+  if (!response.ok || !response.body) {
+    throw new Error(`Failed to fetch tarball: ${response.status}`);
+  }
+
+  const outputStream = new PassThrough({ objectMode: true });
+  const nodeStream = new PassThrough();
+  Readable.fromWeb(response.body as any).pipe(nodeStream);
+
+  let genignoreString: string | null = null;
+  const parser = extract();
+
+  nodeStream.pipe(createGunzip()).pipe(parser);
+
+  parser.on("entry", async (header: any, stream: any, next: any) => {
+    try {
+      const filePath = "/" + header.name.split("/").slice(1).join("/");
+      const type = header.type;
+
+      if (type !== "file") {
+        stream.resume();
+        next();
+        return;
+      }
+
+      // Handle .genignore file
+      if (filePath === "/.genignore" && !disableGenignore) {
+        const chunks: Buffer[] = [];
+        stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+        stream.on("end", () => {
+          genignoreString = Buffer.concat(chunks).toString("utf8");
+          next();
+        });
+        return;
+      }
+
+      // Check if file should be included
+      if (
+        !shouldIncludeFile({
+          ...filterOptions,
+          filePath,
+          yamlParse,
+        })
+      ) {
+        stream.resume();
+        next();
+        return;
+      }
+
+      // Process the file
+      const processor = new FileProcessor(filePath);
+
+      processor.on("data", (data) => {
+        // Check token limit before processing
+        if (
+          data.entry.type === "content" &&
+          !tokenCounter.canAddFile(data.entry.content)
+        ) {
+          stream.resume();
+          next();
+          return;
+        }
+
+        // Update token count and write data
+        if (data.entry.type === "content") {
+          tokenCounter.addFile(data.entry.content);
+        }
+        outputStream.write(data);
+      });
+
+      processor.on("end", () => {
+        next();
+      });
+
+      processor.on("error", (err) => {
+        console.error("Processor error:", err);
+        next(err);
+      });
+
+      stream.pipe(processor);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  parser.on("finish", () => {
+    if (genignoreString && !disableGenignore) {
+      const ignoreFilter = compile(genignoreString);
+      const filteredStream = new Transform({
+        objectMode: true,
+        transform(chunk, encoding, callback) {
+          if (ignoreFilter.accepts(chunk.path.slice(1))) {
+            this.push(chunk);
+          }
+          callback();
+        },
+        flush(callback) {
+          callback();
+          outputStream.end();
+        },
+      });
+      outputStream.pipe(filteredStream);
+    } else {
+      outputStream.end();
+    }
+  });
+
+  parser.on("error", (err) => {
+    outputStream.destroy(err);
+  });
+
+  return outputStream;
+};

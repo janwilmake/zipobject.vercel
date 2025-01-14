@@ -1,0 +1,321 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ZIPObject API",
+    "version": "1.1.0",
+    "description": "API for fetching contents from ZIP files with various filtering options"
+  },
+  "servers": [{ "url": "https://zipobject.com/" }],
+  "security": [{}, { "bearerAuth": [] }],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "getZipContents",
+        "summary": "Get ZIP contents",
+        "description": "Fetch contents of a ZIP file, with various filtering options.",
+        "parameters": [
+          {
+            "name": "zipUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL of the ZIP file to process"
+          },
+          {
+            "name": "zipType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["zipball", "tarball"]
+            },
+            "description": "What type of zip is it? Defaults to zipball"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Alternative URL of a website where the zip can be found."
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Authentication token for accessing the ZIP file"
+          },
+          {
+            "name": "immutable",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Indicates if the ZIP file is immutable"
+          },
+          {
+            "name": "matchFilenames",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of filenames to match (case-insensitive)"
+          },
+          {
+            "name": "ext",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of file extensions to include"
+          },
+          {
+            "name": "dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of directories to include"
+          },
+          {
+            "name": "exclude-ext",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of file extensions to exclude"
+          },
+          {
+            "name": "exclude-dir",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of directories to exclude"
+          },
+          {
+            "name": "disableGenignore",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "`.genignore` works like `.gitignore` and can be placed in the ZIP to automatically filter out files.\n\nTo disable this automatic filter you can set this to true."
+          },
+          {
+            "name": "maxFileSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Maximum file size to include (in bytes)"
+          },
+          {
+            "name": "maxTokens",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Maximum number of tokens allowed in the response"
+          },
+          {
+            "name": "yamlString",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An URL Encoded string of a yaml of a subset of the file hierarchy of files you want to include"
+          },
+          {
+            "name": "omitFiles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "If set to 'true' the response will not include the files"
+          },
+          {
+            "name": "omitTree",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "If set to 'true' the response will not include the tree"
+          },
+          {
+            "name": "disableCache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "If set to 'true' the response will not be cached"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A directory tree and all (filtered) files from the ZIP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["size", "tree", "files"],
+                  "properties": {
+                    "size": {
+                      "type": "object",
+                      "properties": {
+                        "totalFiles": {
+                          "type": "number",
+                          "description": "Total filecount including omitted files"
+                        },
+                        "files": {
+                          "type": "number",
+                          "description": "Total filecount excluding omitted files"
+                        },
+                        "totalTokens": {
+                          "type": "number",
+                          "description": "Approximated tokens of all string files combined. May slightly vary depending on which AI model you use."
+                        },
+                        "tokens": {
+                          "type": "number",
+                          "description": "Same as total tokens except it could be filtered when maxTokens is applied."
+                        },
+                        "characters": { "type": "number" },
+                        "lines": { "type": "number" }
+                      }
+                    },
+                    "tree": {
+                      "description": "Recursive object that describes the file hierarchy. Null is a leaf file. Folders always contain another tree.",
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          { "type": "null" },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "anyOf": [
+                                { "type": "null" },
+                                { "$ref": "#/components/schemas/Tree" }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "files": {
+                      "type": "object",
+                      "description": "The file object. Keys are filepaths starting with '/'.",
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["type", "size", "hash"],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": ["content", "binary"]
+                          },
+                          "size": {
+                            "type": "number",
+                            "description": "Size in bytes."
+                          },
+                          "hash": {
+                            "type": "string",
+                            "description": "Hash of the content that makes it easy to check for equality."
+                          },
+                          "content": {
+                            "type": "string",
+                            "description": "Can be either utf-8 content, or binary encoded as base-64 string."
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "GET URL resolving to the content"
+                          },
+                          "json": {
+                            "type": "object",
+                            "description": "If content is in JSON, YAML, CSV, XML or other structured data format, the parsed data may be put here as JSON object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ZIP file or requested contents not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access to ZIP file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Tree": {
+        "description": "Recursive object that describes the file hierarchy. Null is a leaf file. Folders always contain another tree.",
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [{ "type": "null" }, { "$ref": "#/components/schemas/Tree" }]
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authentication token for accessing protected ZIP files"
+      }
+    }
+  }
+}
