@@ -1,4 +1,5 @@
 {
+  "$ref": "https://ref.actionschema.com/openapi.json",
   "openapi": "3.1.0",
   "info": {
     "title": "ZIPObject API",
@@ -41,6 +42,25 @@
               "type": "string"
             },
             "description": "Alternative URL of a website where the zip can be found."
+          },
+          {
+            "name": "objectUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "URL where a JSON object or file object can be found."
+          },
+          {
+            "name": "objectType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["file-object", "json"]
+            },
+            "description": "File objects are processed by looking at the file items and downloading binary, while json objects are processed by collpasing subsets into files when a property with known extension is encountered."
           },
           {
             "name": "apiKey",
@@ -175,6 +195,9 @@
           "200": {
             "description": "A directory tree and all (filtered) files from the ZIP",
             "content": {
+              "application/zip": {
+                "schema": { "type": "string", "format": "binary" }
+              },
               "application/json": {
                 "schema": {
                   "type": "object",
