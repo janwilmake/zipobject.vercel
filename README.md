@@ -1,5 +1,4 @@
-> [!TODO]
-> TODO:
+> [!CAUTION] > **TODO** Let's do this before forgetting about it. Let's replace uithub core with zipobject.
 
 - `omitFiles` doesn't work yet in `JSONStreamer`
 - confirm all filters work properly
@@ -9,7 +8,8 @@
 
 # ZIPObject
 
-General purpose edge function that extracts any zip into a JSON/YAML object with a focus on cost/efficiency and performance.
+> [!NOTE]  
+> General purpose edge function that extracts any zip into a JSON/YAML object with a focus on cost/efficiency and performance.
 
 Background: For uithub and other work, I need to be capable of extracting gigabytes of data per second cheaply and fast. By making things stream and cache results after computation, we can effectively remove all bottlenecks and have insane speed.
 
@@ -22,7 +22,7 @@ Stream/Filter Layer:
   - ✓ JSON Streaming (files first, then tree, then size)
   - ✓ Streaming to a ZIP (also binary files)
 
-Cache Layer:
+Cache Layer (TODO):
 
 - etag based caching, and immutable zips can visit cache directly
 - Ability to disable cache
@@ -30,16 +30,22 @@ Cache Layer:
 - Ratelimit that can be bypassed by API key holders (or if things were cached)
 - Support for RangeRequest for any zip
 
-Improved processing:
+Improved processing (TODO):
 
 - VSCode-like path-match and in-file search with regex
 - Support to create a single zip from an object that references multiple zips as `FileEntry<{url:string}>` or `JSON<{$ref:string}>`
 - Shadowrule support (see https://github.com/janwilmake/shadowfs)
 - Support for [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)
 
+> [!IMPORTANT]  
+> I will work on this soon
+
 # Idea
 
 Instead of open sourcing uithub, why don't I open source this? The thing is a lot of people would then start streaming zips and thus using github as a datastore for their product. This is currently hard. It's a really cool piece of technology, so definitely cool to open source it.
+
+> [!WARNING]  
+> This is a warning
 
 # Performance / Cost: Max $50
 
@@ -51,4 +57,5 @@ https://vercel.com/code-from-anywheres-projects/zipobject/observability/route/%2
 
 https://vercel.com/code-from-anywheres-projects/~/usage?projectId=prj_MA96ZLbSkYD6t72IzEpAc0eJiBcJ
 
-Let's keep an eye on these pages, if it starts hitting high, we may benefit from reducing allocated memory, for example, all the way down to a 128MB edge function. As a fallback, we can do 3GB for large repos, if that would make it faster.
+> [!TIP]
+> Let's keep an eye on these pages, if it starts hitting high, we may benefit from reducing allocated memory, for example, all the way down to a 128MB edge function. As a fallback, we can do 3GB for large repos, if that would make it faster.
