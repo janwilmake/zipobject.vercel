@@ -19,13 +19,14 @@ export type BallOptions = {
   zipHeaders?: { [name: string]: string };
   immutable: boolean;
   matchFilenames?: string[];
-  includeExt: string[];
-  excludeExt: string[];
+  includeExt?: string[];
+  excludeExt?: string[];
   yamlFilter?: string;
   allowedPaths?: string[];
-  includeDir: string[];
-  excludeDir: string[];
+  includeDir?: string[];
+  excludeDir?: string[];
   disableGenignore?: boolean;
   maxFileSize?: number;
   maxTokens?: number;
+  shouldOmitFiles?: boolean;
 };

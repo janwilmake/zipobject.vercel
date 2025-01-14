@@ -38,6 +38,7 @@ export const getZipUrl = (
       .slice(1)
       .split("/");
     const path = pathChunks ? pathChunks.join("/") : undefined;
+
     // parse github URL
     const ref = branch && branch !== "" ? branch : `HEAD`;
     const isPrivate = !!apiKey;

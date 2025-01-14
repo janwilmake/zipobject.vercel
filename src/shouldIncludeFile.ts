@@ -1,10 +1,10 @@
 export const shouldIncludeFile = (context: {
   yamlParse?: any;
   filePath: string;
-  includeExt: string[] | undefined;
-  excludeExt: string[] | undefined;
-  includeDir: string[] | undefined;
-  excludeDir: string[] | undefined;
+  includeExt?: string[];
+  excludeExt?: string[];
+  includeDir?: string[];
+  excludeDir?: string[];
   allowedPaths?: string[];
   matchFilenames?: string[];
 }) => {
@@ -31,10 +31,16 @@ export const shouldIncludeFile = (context: {
   if (includeExt && !includeExt.includes(ext)) return false;
   if (excludeExt && excludeExt.includes(ext)) return false;
 
+  const surroundSlashes = (str: string) =>
+    (str.startsWith("/") ? "" : "/") + str + (str.endsWith("/") ? "" : "/");
   // passing this omits include/exclude dir but stil allows for ext filter
   const pathAllowed =
     allowedPaths && allowedPaths.length > 0
-      ? allowedPaths.some((path) => filePath.startsWith(path))
+      ? allowedPaths.some(
+          (path) =>
+            filePath.startsWith(surroundSlashes(path)) ||
+            filePath + "/" === surroundSlashes(path),
+        )
       : true;
 
   // here we're combining paths and the yamlfilter!

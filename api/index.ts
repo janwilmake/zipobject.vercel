@@ -4,6 +4,7 @@ import { JSONStreamer } from "../src/JSONStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
 import { createTarballStream } from "../src/createTarballStream.js";
 import { createZipballStream } from "../src/createZipballStream.js";
+import { BallOptions } from "../src/types.js";
 
 export const GET = async (request: Request, context: { waitUntil: any }) => {
   const url = new URL(request.url);
@@ -40,17 +41,18 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   }
 
   const { zipHeaders, zipUrl, immutable, type, path } = urlParse;
-  console.log({ zipHeaders, zipUrl, immutable, type });
+  console.log({ zipUrl, path });
 
   //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
   const disableCache = url.searchParams.get("disableCache") === "true";
 
   const allowedPathsQuery = url.searchParams.getAll("allowedPaths");
-  const allowedPaths = allowedPathsQuery
+  const allowedPaths = allowedPathsQuery.length
     ? allowedPathsQuery
     : path
     ? [path]
     : undefined;
+
   const shouldOmitFiles = url.searchParams.get("omitFiles") === "true";
   // only for JSON
   const shouldOmitTree = url.searchParams.get("omitTree") === "true";
@@ -81,12 +83,12 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       ? Number(maxTokensQuery)
       : undefined;
 
-  const options = {
+  const options: BallOptions = {
+    allowedPaths,
     maxTokens,
     zipUrl,
     zipHeaders,
     immutable,
-    allowedPaths,
     disableGenignore,
     excludeDir,
     excludeExt,

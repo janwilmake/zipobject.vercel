@@ -15,10 +15,15 @@ Cache Layer:
 - Ability to disable cache
 - Configurable max-age/staleness
 - Ratelimit that can be bypassed by API key holders (or if things were cached)
+- Support for RangeRequest for any zip
 
 TODO:
 
-- omitFiles doesn't work yet in `JSONStreamer`
-- Test streaming to a zip and make that work, including binary. Can I now stream all markdown in `oven-sh/bun`?
+- `omitFiles` doesn't work yet in `JSONStreamer`
+- confirm all filters work properly
+- Test streaming to a zip and make that work, including binary. This is a crazily useful feature now.
 - Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
-- Create the cache layer
+
+Then... use zipobject in zipobject.config and uithub. uithub can now move to cloudflare!
+
+After all that, cache layer!
