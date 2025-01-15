@@ -39,6 +39,19 @@ export const getZipUrl = (
       .split("/");
     const path = pathChunks ? pathChunks.join("/") : undefined;
 
+    const wikiRegex = /^([\w-]+)\/([\w-]+)\/wiki(\/.*)?$/;
+    const wikiMatch = url.pathname.slice(1).match(wikiRegex);
+
+    if (wikiMatch) {
+      return {
+        zipHeaders: undefined,
+        immutable: false,
+        zipUrl: `https://wiki.forgithub.com/${owner}/${repo}/wiki`,
+        type: "zipball",
+        path: wikiMatch[3]?.slice(1), // Remove leading slash if exists
+      };
+    }
+
     // parse github URL
     const ref = branch && branch !== "" ? branch : `HEAD`;
     const isPrivate = !!apiKey;
