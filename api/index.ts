@@ -1,3 +1,5 @@
+// api is complex and badly logged. Let's simplify
+
 import { ReadableStream as WebReadableStream } from "node:stream/web";
 import { getZipUrl } from "../src/getZipUrl.js";
 import { JSONStreamer } from "../src/JSONStreamer.js";
@@ -12,35 +14,39 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     url.searchParams.get("apiKey") ||
     request.headers.get("Authorization")?.slice("Bearer ".length);
   const immutableQuery = url.searchParams.get("immutable");
-  const zipUrlQuery = url.searchParams.get("zipUrl");
-  const urlQuery = url.searchParams.get("url");
   const pathUrl = url.searchParams.get("pathUrl");
-  const siteUrl = urlQuery || pathUrl;
   const zipType = url.searchParams.get("zipType");
-  console.log({ immutableQuery, zipUrlQuery, siteUrl, pathUrl, zipType });
-  const urlParse = zipUrlQuery
-    ? {
-        zipUrl: zipUrlQuery,
-        immutable: immutableQuery === "true",
-        zipHeaders: { Authorization: `Bearer ${apiKey}` },
-        type: zipType === "tarball" ? "tarball" : "zipball",
-        path: undefined,
+  if (!pathUrl) {
+    return new Response("No pathurl", { status: 500 });
+  }
+
+  console.log({ pathUrl });
+  // first, try to get a zip url from the url with a specific format:
+  let urlParse:
+    | {
+        zipUrl: string;
+        immutable: boolean;
+        zipHeaders?: { [name: string]: string };
+        type: string;
+        path: string | undefined;
       }
-    : siteUrl
-    ? getZipUrl(siteUrl, apiKey)
-    : { error: "Please provide either zipUrl or url" };
-  if ("error" in urlParse) {
-    if (request.headers.get("accept")?.includes("text/html")) {
-      return new Response("Invalid input url/zipUrl", {
-        status: 307,
-        headers: {
-          Location: url.origin + "/openapi.html#/operations/getZipContents",
-        },
-      });
-    }
-    return new Response("Invalid input url/zipUrl:" + urlParse.error, {
-      status: 400,
-    });
+    | undefined = undefined;
+
+  const siteUrlParse = getZipUrl(pathUrl, apiKey);
+  if ("zipUrl" in siteUrlParse) {
+    urlParse = siteUrlParse;
+  } else {
+    urlParse = {
+      zipUrl: pathUrl,
+      immutable: immutableQuery === "true",
+      zipHeaders: { Authorization: `Bearer ${apiKey}` },
+      type: zipType === "tarball" ? "tarball" : "zipball",
+      path: undefined,
+    };
+  }
+
+  if (!urlParse) {
+    return new Response("WTF", { status: 500 });
   }
 
   const { zipHeaders, zipUrl, immutable, type, path } = urlParse;

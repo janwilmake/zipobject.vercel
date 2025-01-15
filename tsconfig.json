@@ -1,6 +1,5 @@
 {
   "files": ["globals.d.ts"],
-
   "compilerOptions": {
     "esModuleInterop": true,
     "module": "NodeNext",

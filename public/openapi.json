@@ -9,21 +9,22 @@
   "servers": [{ "url": "https://zipobject.com/" }],
   "security": [{}, { "bearerAuth": [] }],
   "paths": {
-    "/": {
+    "/{url}": {
       "get": {
         "operationId": "getZipContents",
         "summary": "Get ZIP contents",
         "description": "Fetch contents of a ZIP file, with various filtering options.",
         "parameters": [
           {
-            "name": "zipUrl",
-            "in": "query",
-            "required": false,
+            "name": "url",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "URL of the ZIP file to process"
+            "description": "URL of the ZIP file to process, URL of a website where the zip can be found, or URL where a JSON object or file object can be found."
           },
+
           {
             "name": "zipType",
             "in": "query",
@@ -34,24 +35,7 @@
             },
             "description": "What type of zip is it? Defaults to zipball"
           },
-          {
-            "name": "url",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Alternative URL of a website where the zip can be found."
-          },
-          {
-            "name": "objectUrl",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "URL where a JSON object or file object can be found."
-          },
+
           {
             "name": "objectType",
             "in": "query",
