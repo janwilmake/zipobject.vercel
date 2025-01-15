@@ -20,7 +20,6 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     return new Response("No pathurl", { status: 500 });
   }
 
-  console.log({ pathUrl });
   // first, try to get a zip url from the url with a specific format:
   let urlParse:
     | {
