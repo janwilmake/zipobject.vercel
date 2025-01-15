@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "alias": ["zipobject.com"],
   "regions": ["iad1"],
   "redirects": [{ "source": "/:path/", "destination": "/:path" }],
   "rewrites": [
