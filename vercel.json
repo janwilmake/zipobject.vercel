@@ -5,7 +5,7 @@
   "redirects": [{ "source": "/:path/", "destination": "/:path" }],
   "rewrites": [
     {
-      "source": "/:url*",
+      "source": "/:pathUrl*",
       "destination": "/api/index.ts"
     },
     {

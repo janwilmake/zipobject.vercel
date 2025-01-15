@@ -13,8 +13,11 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     request.headers.get("Authorization")?.slice("Bearer ".length);
   const immutableQuery = url.searchParams.get("immutable");
   const zipUrlQuery = url.searchParams.get("zipUrl");
-  const siteUrl = url.searchParams.get("url");
+  const urlQuery = url.searchParams.get("url");
+  const pathUrl = url.searchParams.get("pathUrl");
+  const siteUrl = urlQuery || pathUrl;
   const zipType = url.searchParams.get("zipType");
+  console.log({ immutableQuery, zipUrlQuery, siteUrl, pathUrl, zipType });
   const urlParse = zipUrlQuery
     ? {
         zipUrl: zipUrlQuery,
