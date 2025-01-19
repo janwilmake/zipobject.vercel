@@ -32,17 +32,6 @@ Improved processing (TODO):
 > [!IMPORTANT]  
 > I will work on this soon
 
-## TODO
-
-> [!CAUTION]
-> Let's do this before forgetting about it. Let's replace uithub core with zipobject.
-
-- `omitFiles` doesn't work yet in `JSONStreamer`
-- confirm all filters work properly
-- Test streaming to a zip and make that work, including binary. This is a crazily useful feature now.
-- Add `objectUrl`, which could do the filter directly from the JSON, and you can turn a fileObject or JSON (with $ref's) into a zip.
-- Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
-
 # Idea
 
 Instead of open sourcing uithub, why don't I open source this? The thing is a lot of people would then start streaming zips and thus using github as a datastore for their product. This is currently hard. It's a really cool piece of technology, so definitely cool to open source it.

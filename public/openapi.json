@@ -6,7 +6,10 @@
     "version": "1.1.0",
     "description": "API for fetching contents from ZIP files with various filtering options"
   },
-  "servers": [{ "url": "https://zipobject.com/" }],
+  "servers": [
+    { "url": "https://zipobject.com/" },
+    { "url": "https://zipobject.vercel.app/" }
+  ],
   "security": [{}, { "bearerAuth": [] }],
   "paths": {
     "/{url}": {
