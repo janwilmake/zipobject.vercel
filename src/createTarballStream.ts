@@ -16,6 +16,8 @@ export const createTarballStream = async (options: BallOptions) => {
     disableGenignore,
     yamlFilter,
     maxTokens,
+    rawUrlPrefix,
+    omitFirstSegment,
     ...filterOptions
   } = options;
 
@@ -48,7 +50,12 @@ export const createTarballStream = async (options: BallOptions) => {
 
   parser.on("entry", async (header: any, stream: any, next: any) => {
     try {
-      const filePath = "/" + header.name.split("/").slice(1).join("/");
+      const filePath =
+        "/" +
+        (omitFirstSegment
+          ? header.name.split("/").slice(1).join("/")
+          : header.name);
+
       const type = header.type;
 
       if (type !== "file") {
@@ -82,7 +89,7 @@ export const createTarballStream = async (options: BallOptions) => {
       }
 
       // Process the file
-      const processor = new FileProcessor(filePath);
+      const processor = new FileProcessor(filePath, rawUrlPrefix);
 
       processor.on("data", (data) => {
         // Check token limit before processing

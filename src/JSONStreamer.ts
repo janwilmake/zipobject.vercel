@@ -136,24 +136,25 @@ export class JSONStreamer extends Transform {
       this.totalLines += parsedEntry.content.split("\n").length;
     }
 
-    let output = "";
-
-    if (this.firstChunk) {
-      output += `${INDENT}"files": {\n`;
-      this.firstChunk = false;
-      this.filesStarted = true;
-    } else if (this.filesStarted) {
-      output += ",\n";
-    }
-
     // Pretty print the entry JSON with proper indentation
-    const entryJson = JSON.stringify(parsedEntry, null, 2)
-      .split("\n")
-      .map((line, index) => (index === 0 ? line : INDENT + INDENT + line))
-      .join("\n");
 
-    output += `${INDENT}${INDENT}"${chunk.path}": ${entryJson}`;
-    this.push(output);
+    if (!this.options.shouldOmitFiles) {
+      let output = "";
+
+      if (this.firstChunk) {
+        output += `${INDENT}"files": {\n`;
+        this.firstChunk = false;
+        this.filesStarted = true;
+      } else if (this.filesStarted) {
+        output += ",\n";
+      }
+      const entryJson = JSON.stringify(parsedEntry, null, 2)
+        .split("\n")
+        .map((line, index) => (index === 0 ? line : INDENT + INDENT + line))
+        .join("\n");
+      output += `${INDENT}${INDENT}"${chunk.path}": ${entryJson}`;
+      this.push(output);
+    }
     callback();
   }
 

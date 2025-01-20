@@ -1,7 +1,7 @@
 // api is complex and badly logged. Let's simplify
 
 import { ReadableStream as WebReadableStream } from "node:stream/web";
-import { getZipUrl } from "../src/getZipUrl.js";
+import { getZipUrl, ZipInfo } from "../src/getZipUrl.js";
 import { JSONStreamer } from "../src/JSONStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
 import { createTarballStream } from "../src/createTarballStream.js";
@@ -21,22 +21,19 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   }
 
   // first, try to get a zip url from the url with a specific format:
-  let urlParse:
-    | {
-        zipUrl: string;
-        immutable: boolean;
-        zipHeaders?: { [name: string]: string };
-        type: string;
-        path: string | undefined;
-      }
-    | undefined = undefined;
+  let urlParse: ZipInfo | undefined = undefined;
 
   const siteUrlParse = getZipUrl(pathUrl, apiKey);
+
   if ("zipUrl" in siteUrlParse) {
     urlParse = siteUrlParse;
   } else {
     urlParse = {
       zipUrl: pathUrl,
+      omitFirstSegment: false,
+      rawUrlPrefix: `https://zipobject.com/file/${encodeURIComponent(
+        pathUrl,
+      )}/path`,
       immutable: immutableQuery === "true",
       zipHeaders: { Authorization: `Bearer ${apiKey}` },
       type: zipType === "tarball" ? "tarball" : "zipball",
@@ -45,11 +42,18 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   }
 
   if (!urlParse) {
-    return new Response("WTF", { status: 500 });
+    return new Response("Shouldn't happen", { status: 500 });
   }
 
-  const { zipHeaders, zipUrl, immutable, type, path } = urlParse;
-  console.log({ zipUrl, path });
+  const {
+    zipHeaders,
+    zipUrl,
+    immutable,
+    type,
+    path,
+    rawUrlPrefix,
+    omitFirstSegment,
+  } = urlParse;
 
   //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
   const disableCache = url.searchParams.get("disableCache") === "true";
@@ -57,7 +61,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   const allowedPathsQuery = url.searchParams.getAll("allowedPaths");
   const allowedPaths = allowedPathsQuery.length
     ? allowedPathsQuery
-    : path
+    : path !== undefined && path !== ""
     ? [path]
     : undefined;
 
@@ -92,6 +96,8 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       : undefined;
 
   const options: BallOptions = {
+    omitFirstSegment,
+    rawUrlPrefix,
     allowedPaths,
     maxTokens,
     zipUrl,

@@ -9,7 +9,7 @@ export class FileProcessor extends Transform {
   private hash = createHash("sha256");
   private isBinary = false;
 
-  constructor(private path: string) {
+  constructor(private path: string, private rawUrlPrefix: string) {
     super({
       objectMode: true, // Enable object mode
     });
@@ -38,7 +38,7 @@ export class FileProcessor extends Transform {
     const entry: FileEntry = this.isBinary
       ? {
           type: "binary",
-          url: "", // You might want to generate a URL for binary content
+          url: this.rawUrlPrefix + this.path,
           hash,
           size: this.size,
         }

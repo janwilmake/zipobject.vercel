@@ -14,6 +14,8 @@ export const createZipballStream = async (options: BallOptions) => {
     disableGenignore,
     yamlFilter,
     maxTokens,
+    rawUrlPrefix,
+    omitFirstSegment,
     ...filterOptions
   } = options;
 
@@ -43,7 +45,12 @@ export const createZipballStream = async (options: BallOptions) => {
   const unzipStream = nodeStream.pipe(Parse());
 
   unzipStream.on("entry", async (entry: any) => {
-    const filePath = "/" + entry.path.split("/").slice(1).join("/");
+    const filePath =
+      "/" +
+      (omitFirstSegment
+        ? entry.path.split("/").slice(1).join("/")
+        : entry.path);
+
     const type = entry.type;
 
     if (type !== "File") {
@@ -74,7 +81,7 @@ export const createZipballStream = async (options: BallOptions) => {
     }
 
     // Process the file
-    const processor = new FileProcessor(filePath);
+    const processor = new FileProcessor(filePath, rawUrlPrefix);
 
     processor.on("data", (data) => {
       // Check token limit before processing
