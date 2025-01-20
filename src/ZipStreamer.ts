@@ -1,4 +1,3 @@
-// src/streamers/ZipStreamer.ts
 import { Transform } from "node:stream";
 //@ts-ignore
 import JSZip from "jszip";
@@ -18,13 +17,19 @@ export class ZipStreamer extends Transform {
     callback: Function,
   ) {
     if (chunk.entry.type === "content" && chunk.entry.content) {
-      this.zip.file(chunk.path, chunk.entry.content);
+      this.zip.file(chunk.path, chunk.entry.content, {
+        binary: false,
+        // date: new Date(chunk.entry.updatedAt),
+        createFolders: true,
+      });
+    } else if (chunk.entry.type === "binary" && chunk.entry.binary) {
+      // this.zip.file(chunk.path, chunk.entry.binary, {
+      //   binary: true,
+      //   date: new Date(chunk.entry.updatedAt),
+      //   createFolders: true,
+      // });
     } else if (chunk.entry.type === "binary" && chunk.entry.url) {
-      // For binary files, we could either:
-      // 1. Skip them
-      // 2. Fetch them if URL is available
-      // 3. Include them as empty/placeholder files
-      // For now, we'll skip them
+      // Do nothing for now. We should later fetch these binary URLs to get the actual content
     }
     callback();
   }

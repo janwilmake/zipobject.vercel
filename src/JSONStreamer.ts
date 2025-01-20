@@ -116,6 +116,12 @@ export class JSONStreamer extends Transform {
       }
     }
 
+    if (entry.type === "binary" && entry.binary) {
+      // remove binary
+      const { binary, ...withoutBinary } = entry;
+      return withoutBinary;
+    }
+
     return entry;
   }
 
@@ -159,7 +165,7 @@ export class JSONStreamer extends Transform {
   }
 
   _flush(callback: Function) {
-    let output = `\n${INDENT}}`; // Close files object
+    let output = !this.options.shouldOmitFiles ? `\n${INDENT}}` : ""; // Close files object
 
     // Add tree if not omitted
     if (!this.options.shouldOmitTree) {
@@ -172,7 +178,9 @@ export class JSONStreamer extends Transform {
         .map((line, index) => (index === 0 ? line : INDENT + line))
         .join("\n");
 
-      output += `,\n${INDENT}"tree": ${treeJson}`;
+      const comma = this.options.shouldOmitFiles ? "" : `,\n`;
+
+      output += `${comma}${INDENT}"tree": ${treeJson}`;
     }
 
     // Add size stats at the end
@@ -181,8 +189,9 @@ export class JSONStreamer extends Transform {
       .split("\n")
       .map((line, index) => (index === 0 ? line : INDENT + line))
       .join("\n");
-
-    output += `,\n${INDENT}"size": ${statsJson}`;
+    const { shouldOmitFiles, shouldOmitTree } = this.options;
+    const comma = shouldOmitFiles && shouldOmitTree ? "" : `,\n`;
+    output += `${comma}${INDENT}"size": ${statsJson}`;
 
     output += "\n}"; // Close root object
     this.push(output);

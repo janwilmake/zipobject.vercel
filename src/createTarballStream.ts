@@ -89,7 +89,7 @@ export const createTarballStream = async (options: BallOptions) => {
       }
 
       // Process the file
-      const processor = new FileProcessor(filePath, rawUrlPrefix);
+      const processor = new FileProcessor(filePath, rawUrlPrefix, Date.now());
 
       processor.on("data", (data) => {
         // Check token limit before processing

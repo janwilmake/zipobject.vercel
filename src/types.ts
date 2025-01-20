@@ -8,10 +8,12 @@ export interface StreamHandlerOptions {
 export interface FileEntry {
   type: "binary" | "content";
   content?: string;
+  binary?: ArrayBuffer;
   url?: string;
   size: number;
   hash: string;
   json?: any;
+  updatedAt: number;
 }
 
 export type BallOptions = {

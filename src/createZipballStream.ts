@@ -80,8 +80,10 @@ export const createZipballStream = async (options: BallOptions) => {
       return;
     }
 
+    const updatedAt = new Date(entry.vars.lastModifiedDateTime).valueOf();
+    // not diffrerent, seems invalid: const { lastModifiedDate, lastModifiedTime } = entry.vars;
     // Process the file
-    const processor = new FileProcessor(filePath, rawUrlPrefix);
+    const processor = new FileProcessor(filePath, rawUrlPrefix, updatedAt);
 
     processor.on("data", (data) => {
       // Check token limit before processing
@@ -102,7 +104,9 @@ export const createZipballStream = async (options: BallOptions) => {
 
     processor.on("end", () => {
       // Optional: Log token usage for debugging
-      // console.log(`Current token count: ${tokenCounter.getCurrentTokens()}`);
+      // console.log(
+      //   `createZipballStream: Current token count: ${tokenCounter.getCurrentTokens()}`,
+      // );
     });
 
     processor.on("error", (err) => {

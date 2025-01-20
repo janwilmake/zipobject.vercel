@@ -9,7 +9,11 @@ export class FileProcessor extends Transform {
   private hash = createHash("sha256");
   private isBinary = false;
 
-  constructor(private path: string, private rawUrlPrefix: string) {
+  constructor(
+    private path: string,
+    private rawUrlPrefix: string,
+    private updatedAt: number,
+  ) {
     super({
       objectMode: true, // Enable object mode
     });
@@ -26,7 +30,10 @@ export class FileProcessor extends Transform {
       }
     } catch {
       this.isBinary = true;
-      this.chunks = []; // Clear accumulated chunks
+      //  this.chunks = []; // Clear accumulated chunks
+
+      // keep pushing chunks
+      this.chunks.push(chunk);
     }
 
     callback();
@@ -35,18 +42,22 @@ export class FileProcessor extends Transform {
   _flush(callback: Function) {
     const hash = this.hash.digest("hex");
 
+    const updatedAt = this.updatedAt;
     const entry: FileEntry = this.isBinary
       ? {
           type: "binary",
           url: this.rawUrlPrefix + this.path,
           hash,
           size: this.size,
+          binary: Buffer.concat(this.chunks),
+          updatedAt,
         }
       : {
           type: "content",
           content: Buffer.concat(this.chunks).toString("utf8"),
           hash,
           size: this.size,
+          updatedAt,
         };
 
     this.push({ path: this.path, entry });
