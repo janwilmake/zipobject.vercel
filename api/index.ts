@@ -5,12 +5,27 @@ import {
   zipPrefixesWithFirstSegmentOmitted,
 } from "../src/getZipUrl.js";
 import { JSONStreamer } from "../src/JSONStreamer.js";
+import { JSONSequenceStreamer } from "../src/JSONSequenceStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
 import { createTarballStream } from "../src/createTarballStream.js";
 import { createZipballStream } from "../src/createZipballStream.js";
 import { createJsonStream } from "../src/createJsonStream.js";
 import { BallOptions } from "../src/types.js";
 
+const getFilename = (url: string, responseContentType: string): string => {
+  const ext =
+    responseContentType === "application/json-seq" ? "jsonseq" : "zip";
+
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split("/").filter(Boolean);
+    const lastPart = pathParts[pathParts.length - 1];
+    const baseName = lastPart.split(".")[0];
+    return `${baseName}.${ext}`;
+  } catch {
+    return `repository.${ext}`;
+  }
+};
 type FileType = "zipball" | "tarball" | "compressed" | "json" | "unknown";
 
 const MIME_TYPE_MAP = {
@@ -221,12 +236,26 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
         ? await createZipballStream(options)
         : await createJsonStream(options);
 
+    const possibleResponseTypes = [
+      // json: default
+      "application/json",
+      "application/zip",
+      "application/json-seq",
+    ];
     const responseContentType =
-      accept === "application/zip" ? "application/zip" : "application/json";
+      accept && possibleResponseTypes.includes(accept)
+        ? accept
+        : possibleResponseTypes[0];
 
     const streamHandler =
       responseContentType === "application/zip"
         ? new ZipStreamer()
+        : responseContentType === "application/json-seq"
+        ? new JSONSequenceStreamer({
+            shouldOmitFiles,
+            shouldOmitTree,
+            disableGenignore,
+          })
         : new JSONStreamer({
             shouldOmitFiles,
             shouldOmitTree,
@@ -254,12 +283,24 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       },
     });
 
-    // Return the streaming response
+    const headers = {
+      "Content-Type": responseContentType!,
+      "Transfer-Encoding": "chunked",
+      "X-Content-Type-Options": "nosniff",
+      "Cache-Control": immutable
+        ? "public, max-age=31536000, immutable"
+        : "no-cache",
+      "Content-Disposition":
+        responseContentType === "application/json"
+          ? "inline"
+          : `attachment; filename="${getFilename(
+              pathUrl,
+              responseContentType,
+            )}"`,
+    };
+
     return new Response(webStream as unknown as BodyInit, {
-      headers: {
-        "Content-Type": responseContentType,
-        "Transfer-Encoding": "chunked",
-      },
+      headers,
     });
   } catch (error: any) {
     console.error("Stream processing error:", error);

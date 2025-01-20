@@ -17,7 +17,7 @@
 
 - ✅ `omitFiles` and `omitTree` doesn't work yet in `JSONStreamer`
 - ✅ `ZipStreamer`: Test streaming to a zip and make that work, including binary files.
-- Add ability for the `pathUrl` to lead to a JSON file, which could do the filter directly from the JSON, and you can turn a fileObject or JSON into a zip (looking at shape to determine)
+- ✅ Add ability for the `pathUrl` to lead to a JSON file, which could do the filter directly from the JSON, and you can turn a fileObject or JSON into a zip (looking at shape to determine fileObject or JSON)
 - `JSONSequenceStreamer`: (https://www.rfc-editor.org/rfc/rfc7464, https://claude.ai/chat/924b67b4-de88-4d1c-870d-4ceb5cef2021) would allow to more easily build a streamer on top of.
 
 This is a crazily useful API already.
