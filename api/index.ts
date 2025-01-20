@@ -8,6 +8,7 @@ import { JSONStreamer } from "../src/JSONStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
 import { createTarballStream } from "../src/createTarballStream.js";
 import { createZipballStream } from "../src/createZipballStream.js";
+import { createJsonStream } from "../src/createJsonStream.js";
 import { BallOptions } from "../src/types.js";
 
 type FileType = "zipball" | "tarball" | "compressed" | "json" | "unknown";
@@ -179,7 +180,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   const type = detectFileType(contentType, dataUrl);
 
   if (type === "unknown") {
-    return new Response("Unknown file format", { status: 400 });
+    return new Response("Unknown file format: " + contentType, { status: 400 });
   }
   if (type === "compressed") {
     return new Response("Compression format not supported", { status: 400 });
@@ -218,7 +219,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
         ? await createTarballStream(options)
         : type === "zipball"
         ? await createZipballStream(options)
-        : undefined; // await createJsonStream(options);
+        : await createJsonStream(options);
 
     const responseContentType =
       accept === "application/zip" ? "application/zip" : "application/json";
