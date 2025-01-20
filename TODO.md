@@ -16,7 +16,7 @@
 # Figure out core-streams
 
 - ✅ `omitFiles` and `omitTree` doesn't work yet in `JSONStreamer`
-- `ZipStreamer`: Test streaming to a zip and make that work, including binary files.
+- ✅ `ZipStreamer`: Test streaming to a zip and make that work, including binary files.
 - Add ability for the `pathUrl` to lead to a JSON file, which could do the filter directly from the JSON, and you can turn a fileObject or JSON into a zip (looking at shape to determine)
 - `JSONSequenceStreamer`: (https://www.rfc-editor.org/rfc/rfc7464, https://claude.ai/chat/924b67b4-de88-4d1c-870d-4ceb5cef2021) would allow to more easily build a streamer on top of.
 
@@ -35,6 +35,7 @@ Now this thing starts to actually be usable!
 
 - confirm all filters work properly now
 - Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
+- ensure the thing doesn't crash.
 
 # Other streamers
 
@@ -57,11 +58,15 @@ Be sure to only apply it on typescript/javascript. Maybe I can make similar pars
 
 This would make any sized repo instant... :D
 
+# Fetch builtin
+
+- fetch binary data if not present (incase of fileobject input)
+- $ref's support would be wild. Think about the boundary of this though
+
 # Other wishes
 
 - A plugin for installation of packages
 - A plugin for bundling
-- $ref's support would be wild. Think about the boundary of this though
 - Also, shadowrules (see shadowfs) so i can go zip to zip with rules. Interesting though to see if we can make that stream as well. Probably, everything can stream, in the end. Better to it right.
 
 # UITHUB v2

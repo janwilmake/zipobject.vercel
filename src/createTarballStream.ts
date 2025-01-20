@@ -11,8 +11,7 @@ import { TokenCounter } from "./TokenCounter.js";
 // Updated createTarballStream.ts
 export const createTarballStream = async (options: BallOptions) => {
   const {
-    zipUrl,
-    zipHeaders,
+    response,
     disableGenignore,
     yamlFilter,
     maxTokens,
@@ -32,11 +31,6 @@ export const createTarballStream = async (options: BallOptions) => {
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }
-  }
-
-  const response = await fetch(zipUrl, { headers: zipHeaders });
-  if (!response.ok || !response.body) {
-    throw new Error(`Failed to fetch tarball: ${response.status}`);
   }
 
   const outputStream = new PassThrough({ objectMode: true });

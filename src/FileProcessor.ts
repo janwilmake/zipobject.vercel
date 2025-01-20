@@ -22,18 +22,15 @@ export class FileProcessor extends Transform {
   _transform(chunk: Buffer, encoding: string, callback: Function) {
     this.size += chunk.length;
     this.hash.update(chunk);
+    // always process the chunk
+    this.chunks.push(chunk);
 
     try {
       if (!this.isBinary) {
         this.decoder.decode(chunk, { stream: true });
-        this.chunks.push(chunk);
       }
     } catch {
       this.isBinary = true;
-      //  this.chunks = []; // Clear accumulated chunks
-
-      // keep pushing chunks
-      this.chunks.push(chunk);
     }
 
     callback();
@@ -49,6 +46,7 @@ export class FileProcessor extends Transform {
           url: this.rawUrlPrefix + this.path,
           hash,
           size: this.size,
+          // NB: it may make things less efficient if we have to do this for JSON while we only need the URL
           binary: Buffer.concat(this.chunks),
           updatedAt,
         }

@@ -9,8 +9,7 @@ import { TokenCounter } from "./TokenCounter.js";
 
 export const createZipballStream = async (options: BallOptions) => {
   const {
-    zipUrl,
-    zipHeaders,
+    response,
     disableGenignore,
     yamlFilter,
     maxTokens,
@@ -32,11 +31,6 @@ export const createZipballStream = async (options: BallOptions) => {
     }
   }
 
-  const response = await fetch(zipUrl, { headers: zipHeaders });
-  if (!response.ok || !response.body) {
-    throw new Error(`Failed to fetch zipball: ${response.status}`);
-  }
-
   const outputStream = new PassThrough({ objectMode: true });
   const nodeStream = new PassThrough();
   Readable.fromWeb(response.body as any).pipe(nodeStream);
@@ -44,7 +38,7 @@ export const createZipballStream = async (options: BallOptions) => {
   let genignoreString: string | null = null;
   const unzipStream = nodeStream.pipe(Parse());
 
-  unzipStream.on("entry", async (entry: any) => {
+  unzipStream.on("entry", async (entry) => {
     const filePath =
       "/" +
       (omitFirstSegment

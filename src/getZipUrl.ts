@@ -6,10 +6,8 @@ function isValidGitSHA(str: string) {
 export type ZipType = "zipball" | "tarball";
 
 export type ZipInfo = {
-  omitFirstSegment: boolean;
-  zipUrl: string;
+  dataUrl: string;
   rawUrlPrefix: string;
-  type: ZipType;
   zipHeaders?: { [name: string]: string };
   immutable: boolean;
   path: string | undefined;
@@ -45,11 +43,9 @@ export const getZipUrl = (
     if (wikiMatch) {
       const pathAfterWiki: string = wikiMatch[3]?.slice(1) || "";
       return {
-        omitFirstSegment: false,
         zipHeaders: undefined,
         immutable: false,
-        zipUrl: `https://wikizip.forgithub.com/${owner}/${repo}/wiki`,
-        type: "zipball",
+        dataUrl: `https://wikizip.forgithub.com/${owner}/${repo}/wiki`,
         path: pathAfterWiki,
         rawUrlPrefix: `https://raw.githubusercontent.com/wiki/${owner}/${repo}`,
       };
@@ -59,7 +55,7 @@ export const getZipUrl = (
     const ref = branch && branch !== "" ? branch : `HEAD`;
     const isPrivate = !!apiKey;
     const branchSuffix = branch && branch !== "" ? `/${branch}` : "";
-    const zipUrl = isPrivate
+    const dataUrl = isPrivate
       ? `https://api.github.com/repos/${owner}/${repo}/zipball${branchSuffix}`
       : `https://github.com/${owner}/${repo}/archive/${ref}.zip`;
     const zipHeaders = isPrivate
@@ -67,11 +63,9 @@ export const getZipUrl = (
       : undefined;
     const immutable = isValidGitSHA(branch);
     return {
-      omitFirstSegment: true,
       zipHeaders,
       immutable,
-      zipUrl,
-      type: "zipball",
+      dataUrl,
       path,
       rawUrlPrefix: `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}`,
     };
@@ -86,11 +80,9 @@ export const getZipUrl = (
     }
     // NB: Private packages not supported, for now.
     return {
-      omitFirstSegment: true,
       zipHeaders: undefined,
       immutable: true,
-      type: "tarball",
-      zipUrl: `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`,
+      dataUrl: `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`,
       path: undefined,
       rawUrlPrefix: `https://unpkg.com/${packageName}@${version}`,
     };
@@ -111,14 +103,18 @@ export const getZipUrl = (
 
     // NB: seems consistent to always be ~11 but let's see
     return {
-      omitFirstSegment: true,
       zipHeaders: undefined,
       immutable: true,
-      type: "tarball",
-      zipUrl: `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`,
+      dataUrl: `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`,
       path: undefined,
       rawUrlPrefix: `https://jsr.io/@[${owner}/${packageName}/${version}`,
     };
   }
   return { error: "URL not supported" };
 };
+export const zipPrefixesWithFirstSegmentOmitted = [
+  "https://npm.jsr.io/",
+  "https://registry.npmjs.org/",
+  "https://api.github.com/",
+  "https://github.com/",
+];

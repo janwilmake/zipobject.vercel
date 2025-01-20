@@ -17,11 +17,10 @@ export interface FileEntry {
 }
 
 export type BallOptions = {
+  response: Response;
   /** For github, npmjs, and jsr, this is needed. For other zips this may not be the case */
   omitFirstSegment: boolean;
   rawUrlPrefix: string;
-  zipUrl: string;
-  zipHeaders?: { [name: string]: string };
   immutable: boolean;
   matchFilenames?: string[];
   includeExt?: string[];
