@@ -19,8 +19,8 @@ Cache Layer (TODO):
 - etag based caching, and immutable zips can visit cache directly
 - Ability to disable cache
 - Configurable max-age/staleness
-- Ratelimit that can be bypassed by API key holders (or if things were cached)
 - Support for RangeRequest for any zip
+- Ratelimit that can be bypassed by API key holders (or if things were cached)
 
 Improved processing (TODO):
 
@@ -57,3 +57,11 @@ https://vercel.com/code-from-anywheres-projects/~/usage?projectId=prj_MA96ZLbSkY
 
 > [!TIP]
 > Let's keep an eye on these pages, if it starts hitting high, we may benefit from reducing allocated memory, for example, all the way down to a 128MB edge function. As a fallback, we can do 3GB for large repos, if that would make it faster.
+
+# Intended dependant open source projects
+
+- uithub: exploration of github
+- npmjz: exploration of npmjs/jsr and other package managers
+- ingestwiki: exploration of wikipedia
+- site2text: exploration of any website as markdown
+- gcombinator.news: the ycombinator site but with extra features
