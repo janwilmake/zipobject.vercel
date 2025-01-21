@@ -29,8 +29,14 @@ Improved processing (TODO):
 - Shadowrule support (see https://github.com/janwilmake/shadowfs)
 - Support for [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)
 
-> [!IMPORTANT]  
-> I will work on this soon
+Wishlist:
+
+Let's make the plugin system modular so anyone can make these plugins:
+
+- A plugin for installation of packages
+- A plugin for bundling
+- A plugin that normalizes the imports based on other available paths, and makes more files available if the import references files that weren't available.
+- Also, shadowrules (see shadowfs) so i can go zip to zip with rules. Interesting though to see if we can make that stream as well. Probably, everything can stream, in the end. Better to it right.
 
 # Idea
 

@@ -1,7 +1,7 @@
 import { Declaration } from "@swc/core";
 import { ExportDeclaration } from "@swc/core";
 import { ModuleItem } from "@swc/core";
-import { getIsArrowDeclaration } from "./getIsArrowDeclaration";
+import { getIsArrowDeclaration } from "./getIsArrowDeclaration.js";
 export const getIsModuleItemSwcFunction = (
   item: ModuleItem,
 ): item is Declaration | ExportDeclaration => {

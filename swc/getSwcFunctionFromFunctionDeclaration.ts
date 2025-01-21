@@ -1,7 +1,7 @@
 import { ExportDeclaration } from "@swc/core";
 import { FunctionDeclaration } from "@swc/core";
-import { getRealSpan } from "./getRealSpan";
-import { FileSpan, SwcFunction } from "./types";
+import { getRealSpan } from "./getRealSpan.js";
+import { FileSpan, SwcFunction } from "./types.js";
 export const getSwcFunctionFromFunctionDeclaration = (
   item: ExportDeclaration | FunctionDeclaration,
   filePath: string,

@@ -2,9 +2,12 @@ import { ImportDeclaration, ModuleItem } from "@swc/core";
 import { ImportDefaultSpecifier } from "@swc/core";
 import { ImportNamespaceSpecifier } from "@swc/core";
 import { NamedImportSpecifier } from "@swc/core";
-import { isAbsoluteImport } from "edge-util";
-import { getRealSpan } from "./getRealSpan";
-import { FileSpan, SwcImport } from "./types";
+
+import { getRealSpan } from "./getRealSpan.js";
+import { FileSpan, SwcImport } from "./types.js";
+
+const isAbsoluteImport = (moduleString: string | undefined) =>
+  moduleString ? !moduleString.startsWith(".") : false;
 /**
  * Takes swcModuleItems, and returns an array of imports (name + module)
  */

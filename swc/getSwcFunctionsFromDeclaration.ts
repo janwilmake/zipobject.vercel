@@ -1,10 +1,10 @@
 import { Declaration } from "@swc/core";
 import { ExportDeclaration } from "@swc/core";
-import { notEmpty } from "edge-util";
-import { getSwcFunctionFromFunctionDeclaration } from "./getSwcFunctionFromFunctionDeclaration";
-import { getIsArrowDeclaration } from "./getIsArrowDeclaration";
-import { getSwcFunctionFromVariableDeclarator } from "./getSwcFunctionFromVariableDeclarator";
-import { FileSpan } from "./types";
+import { notEmpty } from "./util.js";
+import { getSwcFunctionFromFunctionDeclaration } from "./getSwcFunctionFromFunctionDeclaration.js";
+import { getIsArrowDeclaration } from "./getIsArrowDeclaration.js";
+import { getSwcFunctionFromVariableDeclarator } from "./getSwcFunctionFromVariableDeclarator.js";
+import { FileSpan } from "./types.js";
 /**
 Detects and finds SwcFunctions in regular and arrow functions, exported or not
  */

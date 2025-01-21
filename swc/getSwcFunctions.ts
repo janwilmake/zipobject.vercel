@@ -1,10 +1,8 @@
-import { Declaration } from "@swc/core";
-import { ExportDeclaration } from "@swc/core";
 import { ModuleItem } from "@swc/core";
-import { notEmpty } from "edge-util";
-import { getSwcFunctionsFromDeclaration } from "./getSwcFunctionsFromDeclaration";
-import { FileSpan, SwcFunction, SwcVariable } from "./types";
-import { getIsModuleItemSwcFunction } from "./getIsModuleItemSwcFunction";
+import { notEmpty } from "./util.js";
+import { getSwcFunctionsFromDeclaration } from "./getSwcFunctionsFromDeclaration.js";
+import { FileSpan, SwcFunction, SwcVariable } from "./types.js";
+import { getIsModuleItemSwcFunction } from "./getIsModuleItemSwcFunction.js";
 /**
 Gets all swc functions
 - get regular functions (exported or not) 

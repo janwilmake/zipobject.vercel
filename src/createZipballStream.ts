@@ -77,7 +77,13 @@ export const createZipballStream = async (options: BallOptions) => {
     const updatedAt = new Date(entry.vars.lastModifiedDateTime).valueOf();
     // not diffrerent, seems invalid: const { lastModifiedDate, lastModifiedTime } = entry.vars;
     // Process the file
-    const processor = new FileProcessor(filePath, rawUrlPrefix, updatedAt);
+    const processor = new FileProcessor(
+      filePath,
+      //TODO: put paths here from central index
+      [],
+      rawUrlPrefix,
+      updatedAt,
+    );
 
     processor.on("data", (data) => {
       // Check token limit before processing

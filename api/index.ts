@@ -164,6 +164,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   // only for JSON
   const shouldOmitTree = url.searchParams.get("omitTree") === "true";
 
+  const plugins = url.searchParams.get("plugins")?.split(",") || [];
   const includeExt = url.searchParams.get("ext")?.split(",");
   const includeDir = url.searchParams.get("dir")?.split(",");
   const excludeExt = url.searchParams.get("exclude-ext")?.split(",");
@@ -266,11 +267,13 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
             shouldOmitFiles,
             shouldOmitTree,
             disableGenignore,
+            plugins,
           })
         : new JSONStreamer({
             shouldOmitFiles,
             shouldOmitTree,
             disableGenignore,
+            plugins,
           });
 
     // Set up the pipeline in Node.js streams

@@ -2,10 +2,10 @@ import { Transform } from "node:stream";
 //@ts-ignore
 import JSZip from "jszip";
 import { FileEntry } from "./types.js";
-
+type Chunk = { path: string; entry: FileEntry };
 export class ZipStreamer extends Transform {
   private zip: JSZip;
-  private buffer: Array<{ path: string; entry: FileEntry }>;
+  private buffer: Array<Chunk>;
 
   constructor() {
     super({
@@ -15,11 +15,7 @@ export class ZipStreamer extends Transform {
     this.buffer = [];
   }
 
-  _transform(
-    chunk: { path: string; entry: FileEntry },
-    encoding: string,
-    callback: Function,
-  ) {
+  _transform(chunk: Chunk, encoding: string, callback: Function) {
     try {
       this.buffer.push(chunk);
       callback();

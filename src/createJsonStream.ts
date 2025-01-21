@@ -99,7 +99,6 @@ export const createJsonStream = async (options: BallOptions) => {
     const filesObject: JsonFilesObject = isFilesObject
       ? jsonData
       : jsonToFileObject(jsonData);
-
     // Process each file entry
     for (const [path, entry] of Object.entries(filesObject.files)) {
       const filePath = omitFirstSegment

@@ -1,27 +1,3 @@
-# binary urls
-
-✅ Add correct binary URLs to zipobject (for which that is possible) - raw.githubusercontent.com etc
-
-- ✅ https://raw.githubusercontent.com/[owner]/[repo]/refs/heads/[shaOrBranch]/[path]
-- ✅ https://jsr.io/@[owner]/[package]/[version] (e.g. https://jsr.io/@cfa/fetch-each/1.0.14)
-- ✅ https://unpkg.com/[package]@[version]/[path] (e.g. https://unpkg.com/dodfetch@0.0.7/public/index.html)
-
-✅ When we don't know this, use zipobject.com/file/xxx/path/xxx as a new endpoint.
-
-# bug: wiki first segment missing
-
-- ✅ Ensure wikizip output is in the same shape as regular github zip. now, it seems to loose folder info or so.
-- ✅ Figured it out: removing the first folder from the zip is now optional
-
-# Figure out core-streams
-
-- ✅ `omitFiles` and `omitTree` doesn't work yet in `JSONStreamer`
-- ✅ `ZipStreamer`: Test streaming to a zip and make that work, including binary files.
-- ✅ Add ability for the `pathUrl` to lead to a JSON file, which could do the filter directly from the JSON, and you can turn a fileObject or JSON into a zip (looking at shape to determine fileObject or JSON)
-- ✅ `JSONSequenceStreamer`: (https://www.rfc-editor.org/rfc/rfc7464, https://claude.ai/chat/924b67b4-de88-4d1c-870d-4ceb5cef2021) would allow to more easily build a streamer on top of.
-
-This is a crazily useful API already.
-
 # Improve zip finding and binary urls
 
 Possible github URLs in browser:
@@ -42,9 +18,14 @@ It's best to create a function to do this trial and error. This would most likel
 
 # Confirm
 
-- confirm all filters work properly now
-- Binary files shouldn't be added if maxTokens is full (maybe count maxTokens as the entire JSON that is added)
-- ensure the thing doesn't crash.
+- Adhere to `maxTokens`
+- Confirm all filters work properly now
+- Ensure the thing doesn't crash when files are empty (or other reasons)
+
+# Fetch builtin
+
+- ✅ when using json as source, support turning $ref's into urls. at first, just do $ref for the top level, to keep it simple
+- For `ZipStreamer`, fetch binary data where only a url is present (incase of fileobject input) - max 1000 subrequests and concurrency will be a major limitation here!
 
 # Other streamers
 
@@ -54,31 +35,11 @@ These can be made separately as open source packages, to encourage others to bui
 - `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
 - `HTMLStreamer` (very opinionated)
 
-These streamers could be made within ZipObject itself, or separated, since they're easily built on top of the JSONSequenceStreamer. This allows greater degree of modularity.
+These streamers could be made within ZipObject itself, or separated, since they're easily built on top of the `JSONSequenceStreamer`. This allows greater degree of modularity.
 
-# plugins
+# `/file` endpoint
 
-Use `swc` to get the parse-data and imports, and allow these to be added as `?plugins=` (comma-separated)
-
-```
-import { getTypescriptFileData } from "../swc/getTypescriptFileData";
-import { trySwcParseFile } from "../swc/trySwcParseFile";
-```
-
-Be sure to only apply it on typescript/javascript. Maybe I can make similar parse-data and imports for other major programming langauges at a later point. These plugins should be packages at some point, so others can easily make them for other purposes too.
-
-This would make any sized repo instant... :D
-
-# Fetch builtin
-
-- fetch binary data where only a url is present (incase of fileobject input)
-- $ref's support would be wild maybe, at first, just do $ref for the top level, to keep it simple
-
-# Other wishes
-
-- A plugin for installation of packages
-- A plugin for bundling
-- Also, shadowrules (see shadowfs) so i can go zip to zip with rules. Interesting though to see if we can make that stream as well. Probably, everything can stream, in the end. Better to it right.
+`/file` was an endpoint that used a responded with a single file. Was needed for githuq/githus to show the file in the right mediatype, hence `mime-types` package. Should be a zipobject feature, espeically cool with range request.
 
 # UITHUB v2
 
@@ -91,9 +52,9 @@ Revamp to CloudFlare! Make it ready for open source too!
 TODO:
 
 - ✅ env variables
+- ✅ binaries
+- proxy `/file`
 - finish `githubFileContentResponse` and make it all work with all filters
-- binaries
-- `/file` was an endpoint that used a responded with a single file. Was needed for githuq/githus to show the file in the right mediatype, hence `mime-types` package. Should be a zipobject feature, espeically cool with range request.
 
 After I get it up to the desired quality level again:
 

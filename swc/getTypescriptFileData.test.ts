@@ -1,7 +1,6 @@
 import { readFileSync } from "fs";
-import { getTypescriptFileData } from "./getTypescriptFileData";
-import { trySwcParseFile } from "./trySwcParseFile";
-import { SwcFileParse } from "./types";
+import { getTypescriptFileData } from "./getTypescriptFileData.js";
+import { trySwcParseFile } from "./trySwcParseFile.js";
 
 const test = async () => {
   const path =

@@ -1,8 +1,11 @@
+import { SwcFileParse } from "../swc/types.js";
+
 // src/streamers/types.ts
 export interface StreamHandlerOptions {
   shouldOmitFiles: boolean;
   shouldOmitTree: boolean;
   disableGenignore: boolean;
+  plugins: string[];
 }
 
 export interface FileEntry {
@@ -12,8 +15,19 @@ export interface FileEntry {
   url?: string;
   size: number;
   hash: string;
-  json?: any;
   updatedAt: number;
+  // plugins
+  /** data file content parsed as json (json, toml, yaml files) */
+  json?: any;
+  /**imported names */
+  imports?: null | { [path: string]: string[] };
+  /**swc-parse */
+  parse?: null | SwcFileParse;
+  /**swc parse for code-files, parsed to statements and imports */
+  data?: null | {
+    imports?: any[];
+    statements?: any[];
+  };
 }
 
 export type BallOptions = {

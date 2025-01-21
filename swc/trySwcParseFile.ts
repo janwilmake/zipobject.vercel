@@ -1,6 +1,6 @@
 import { ParseOptions } from "@swc/core";
-import { trySwcParse } from "./trySwcParse";
-import { SwcFileParse } from "./types";
+import { trySwcParse } from "./trySwcParse.js";
+import { SwcFileParse } from "./types.js";
 /**ugliest hack ever but it fixes the problem that dangles at the end aren't detected */
 export const withTrueSuffix = (src: string) => {
   if (src.endsWith("\ntrue;\n")) {

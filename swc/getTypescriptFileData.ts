@@ -1,9 +1,9 @@
 //goal: fix all broken imports, then rebuild everything in the right order
-import { getSwcFunctions } from "./getSwcFunctions";
-import { getSwcImports } from "./getSwcImports";
-import { getSwcInterfaces } from "./getSwcInterfaces";
-import { getSwcVariables } from "./getSwcVariable";
-import { SwcFileParse, SwcStatement, TypescriptFileData } from "./types";
+import { getSwcFunctions } from "./getSwcFunctions.js";
+import { getSwcImports } from "./getSwcImports.js";
+import { getSwcInterfaces } from "./getSwcInterfaces.js";
+import { getSwcVariables } from "./getSwcVariable.js";
+import { SwcFileParse, SwcStatement, TypescriptFileData } from "./types.js";
 
 /**
  Returns the `TypescriptInstance`[] for a piece of typescript code, using swc to parse it.
@@ -11,15 +11,13 @@ import { SwcFileParse, SwcStatement, TypescriptFileData } from "./types";
  TODO: get the playground for some of my own files, until I understand well enough how the AST works. isn't there a SWC vscode plugin, in the meantime?
 
  */
-export const getTypescriptFileData = async (
+export const getTypescriptFileData = (
   filePath: string,
   fileParse: SwcFileParse,
-): Promise<
-  {
-    isSuccessful: boolean;
-    message?: string;
-  } & Partial<TypescriptFileData>
-> => {
+): {
+  isSuccessful: boolean;
+  message?: string;
+} & Partial<TypescriptFileData> => {
   const { body, fileSpan } = fileParse;
 
   //  console.log({ fileSpan });

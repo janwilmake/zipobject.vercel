@@ -1,8 +1,8 @@
 import { ModuleItem } from "@swc/core";
-import { FileSpan, SwcInterface } from "./types";
-import { notEmpty } from "edge-util";
-import { getModuleItemName } from "./getModuleItemName";
-import { getRealSpan } from "./getRealSpan";
+import { FileSpan, SwcInterface } from "./types.js";
+import { notEmpty } from "./util.js";
+import { getModuleItemName } from "./getModuleItemName.js";
+import { getRealSpan } from "./getRealSpan.js";
 /**
 For now, gets only names/locations and isExported  :) it's enough
  */
