@@ -8,16 +8,15 @@ export type ZipType = "zipball" | "tarball";
 export type ZipInfo = {
   dataUrl: string;
   rawUrlPrefix: string;
-  zipHeaders?: { [name: string]: string };
   immutable: boolean;
   path: string | undefined;
+  response: Response;
 };
 /** Parses zip url, headers, and immutability for common package managers and file systems */
-export const getZipUrl = (
+export const getZipUrl = async (
   siteUrl: string,
   apiKey?: string,
-): ZipInfo | { error: string } => {
-  console.log({ siteUrl });
+): Promise<ZipInfo | { error: string }> => {
   //normalize url
   siteUrl =
     siteUrl.startsWith("https:/") && !siteUrl.startsWith("https://")
@@ -37,16 +36,17 @@ export const getZipUrl = (
       .slice(1)
       .split("/");
     const path = pathChunks ? pathChunks.join("/") : undefined;
-
     const wikiRegex = /^([\w-]+)\/([\w-]+)\/wiki(\/.*)?$/;
     const wikiMatch = url.pathname.slice(1).match(wikiRegex);
     if (wikiMatch) {
       const pathAfterWiki: string = wikiMatch[3]?.slice(1) || "";
+      const dataUrl = `https://wikizip.forgithub.com/${owner}/${repo}/wiki`;
+      const response = await fetch(dataUrl);
       return {
-        zipHeaders: undefined,
         immutable: false,
-        dataUrl: `https://wikizip.forgithub.com/${owner}/${repo}/wiki`,
+        dataUrl,
         path: pathAfterWiki,
+        response,
         rawUrlPrefix: `https://raw.githubusercontent.com/wiki/${owner}/${repo}`,
       };
     }
@@ -61,13 +61,19 @@ export const getZipUrl = (
     const zipHeaders = isPrivate
       ? { Authorization: `token ${apiKey}` }
       : undefined;
+    const response = await fetch(dataUrl, { headers: zipHeaders });
+    const rawUrlPrefix = `https://raw.githubusercontent.com/${owner}/${repo}/${response.url.slice(
+      `https://codeload.github.com/${owner}/${repo}/zip/`.length,
+    )}`;
+
     const immutable = isValidGitSHA(branch);
+
     return {
-      zipHeaders,
       immutable,
       dataUrl,
       path,
-      rawUrlPrefix: `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}`,
+      rawUrlPrefix,
+      response,
     };
   }
 
@@ -78,11 +84,14 @@ export const getZipUrl = (
         error: "NPM Version must be specified in format /packageName/v/version",
       };
     }
+    const dataUrl = `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`;
+    const response = await fetch(dataUrl);
+
     // NB: Private packages not supported, for now.
     return {
-      zipHeaders: undefined,
+      response,
       immutable: true,
-      dataUrl: `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`,
+      dataUrl,
       path: undefined,
       rawUrlPrefix: `https://unpkg.com/${packageName}@${version}`,
     };
@@ -100,12 +109,14 @@ export const getZipUrl = (
     }
 
     const [, owner, packageName, version] = match;
+    const dataUrl = `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`;
+    const response = await fetch(dataUrl);
 
     // NB: seems consistent to always be ~11 but let's see
     return {
-      zipHeaders: undefined,
+      response,
       immutable: true,
-      dataUrl: `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`,
+      dataUrl,
       path: undefined,
       rawUrlPrefix: `https://jsr.io/@[${owner}/${packageName}/${version}`,
     };

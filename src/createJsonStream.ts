@@ -24,17 +24,33 @@ const jsonToFileObject = (json: any) => {
   return {
     files: Object.fromEntries(
       Object.keys(json).map((key) => {
-        const content = JSON.stringify(json[key], undefined, 2);
-        return [
-          key.endsWith(".json") ? key : key + ".json",
-          {
+        const value = json[key];
+        const content = JSON.stringify(value, undefined, 2);
+        const newKey = key.endsWith(".json") ? key : key + ".json";
+
+        try {
+          if (value?.$ref) {
+            new URL(value.$ref);
+            const fileEntry = {
+              type: "binary",
+              hash: "",
+              updatedAt: Date.now(),
+              url: value.$ref,
+            };
+            return [newKey, fileEntry];
+          } else {
+            throw new Error("No ref");
+          }
+        } catch (e) {
+          const fileEntry = {
             type: "content",
             size: content.length,
             hash: "",
             updatedAt: Date.now(),
             content,
-          },
-        ];
+          };
+          return [newKey, fileEntry];
+        }
       }),
     ),
   } satisfies JsonFilesObject;
@@ -75,9 +91,14 @@ export const createJsonStream = async (options: BallOptions) => {
     // Parse JSON response
     const jsonData = await response.json();
 
+    const isFilesObject =
+      "files" in jsonData &&
+      typeof jsonData.files === "object" &&
+      !Array.isArray(jsonData.files);
     // Transform JSON data into files object if needed
-    const filesObject: JsonFilesObject =
-      "files" in jsonData ? jsonData : jsonToFileObject(jsonData);
+    const filesObject: JsonFilesObject = isFilesObject
+      ? jsonData
+      : jsonToFileObject(jsonData);
 
     // Process each file entry
     for (const [path, entry] of Object.entries(filesObject.files)) {

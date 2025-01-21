@@ -116,18 +116,28 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   // first, try to get a zip url from the url with a specific format:
   let urlParse: ZipInfo | undefined = undefined;
 
-  const siteUrlParse = getZipUrl(pathUrl, apiKey);
+  const siteUrlParse = await getZipUrl(pathUrl, apiKey);
 
   if ("dataUrl" in siteUrlParse) {
     urlParse = siteUrlParse;
   } else {
+    try {
+      new URL(pathUrl);
+    } catch (e) {
+      return new Response("Invalid URL: " + pathUrl, { status: 400 });
+    }
+
+    const response = await fetch(pathUrl, {
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
+    });
+
     urlParse = {
+      response,
       dataUrl: pathUrl,
       rawUrlPrefix: `https://zipobject.com/file/${encodeURIComponent(
         pathUrl,
       )}/path`,
       immutable: immutableQuery === "true",
-      zipHeaders: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
       path: undefined,
     };
   }
@@ -136,14 +146,9 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     return new Response("Shouldn't happen", { status: 500 });
   }
 
-  const { zipHeaders, dataUrl, immutable, path, rawUrlPrefix } = urlParse;
+  const { dataUrl, immutable, path, rawUrlPrefix, response } = urlParse;
 
   // check if it's a valid url
-  try {
-    new URL(dataUrl);
-  } catch (e) {
-    return new Response("Invalid URL: " + dataUrl, { status: 400 });
-  }
 
   //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
   const disableCache = url.searchParams.get("disableCache") === "true";
@@ -186,10 +191,16 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       : undefined;
 
   // try it
-  const response = await fetch(dataUrl, { headers: zipHeaders });
   if (!response.ok || !response.body) {
     throw new Error(`Failed to fetch data url: ${response.status}`);
   }
+
+  console.log({
+    dataUrl,
+    responseUrl: response.url,
+    redirected: response.redirected,
+  });
+
   const contentType = response.headers.get("content-type");
 
   const type = detectFileType(contentType, dataUrl);

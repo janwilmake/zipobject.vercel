@@ -18,18 +18,27 @@
 - ✅ `omitFiles` and `omitTree` doesn't work yet in `JSONStreamer`
 - ✅ `ZipStreamer`: Test streaming to a zip and make that work, including binary files.
 - ✅ Add ability for the `pathUrl` to lead to a JSON file, which could do the filter directly from the JSON, and you can turn a fileObject or JSON into a zip (looking at shape to determine fileObject or JSON)
-- `JSONSequenceStreamer`: (https://www.rfc-editor.org/rfc/rfc7464, https://claude.ai/chat/924b67b4-de88-4d1c-870d-4ceb5cef2021) would allow to more easily build a streamer on top of.
+- ✅ `JSONSequenceStreamer`: (https://www.rfc-editor.org/rfc/rfc7464, https://claude.ai/chat/924b67b4-de88-4d1c-870d-4ceb5cef2021) would allow to more easily build a streamer on top of.
 
 This is a crazily useful API already.
 
 # Improve zip finding and binary urls
 
-- for github we must allow tags: https://github.com/facebook/react/archive/refs/tags/v19.0.0.zip (also for private ones)
-- github has even more refs I think.... lets ensure to also support direct shas, and pull refs.
-- we must get the sha and default_branch of a github repo when requesting the zip.
-- for npmjs and jsr packages, resolving to latest version is very useful for usability
+Possible github URLs in browser:
 
-Now this thing starts to actually be usable!
+- https://github.com/facebook/react
+- https://github.com/facebook/react/tree|blob/main/[path]
+- https://github.com/facebook/react/wiki/[page]
+- https://github.com/facebook/react/tree/18eaf51bd51fed8dfed661d64c306759101d0bfd
+- https://github.com/facebook/react/tree/gh/mvitousek/5/orig/compiler (branch can have strange characters including `/`)
+- https://github.com/facebook/react/tree/v16.3.1 (it's a tag)
+
+Two strategies are possible to figure out the zip url and raw url:
+
+1. trial and error; try most likely and try other possibilities later to finally get the zip url. the tricky part is that https://codeload.github.com/facebook/react/zip/refs/ANYTHING will always redirect even if it didn't exist, so we need to follow the redirect.
+2. use `git.listServerRefs`. If we cache it and But this easily takes half a second...
+
+It's best to create a function to do this trial and error. This would most likely just be ratelimited by 5000 req/hour/ip. Additionally we could cache the tagnames and branchnames - but not the shas they're tied to. However, I don't think this is worth the additional complexity as the amount of trials before a hit is likely between 2-3 on average (assuming we start with 2 in parallel).
 
 # Confirm
 
@@ -38,6 +47,8 @@ Now this thing starts to actually be usable!
 - ensure the thing doesn't crash.
 
 # Other streamers
+
+These can be made separately as open source packages, to encourage others to build more.
 
 - `YAMLStreamer`
 - `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
@@ -60,8 +71,8 @@ This would make any sized repo instant... :D
 
 # Fetch builtin
 
-- fetch binary data if not present (incase of fileobject input)
-- $ref's support would be wild. Think about the boundary of this though
+- fetch binary data where only a url is present (incase of fileobject input)
+- $ref's support would be wild maybe, at first, just do $ref for the top level, to keep it simple
 
 # Other wishes
 
