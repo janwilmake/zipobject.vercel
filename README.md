@@ -17,22 +17,16 @@ Stream/Filter Layer:
 Cache Layer (TODO):
 
 - etag based caching, and immutable zips can visit cache directly
-- Ability to disable cache
-- Configurable max-age/staleness
+- Ability to disable cache for private repos
 - Support for RangeRequest for any zip
 - Ratelimit that can be bypassed by API key holders (or if things were cached)
 
-Improved processing (TODO):
+Wishlist:
 
 - VSCode-like path-match and in-file search with regex
 - Support to create a single zip from an object that references multiple zips as `FileEntry<{url:string}>` or `JSON<{$ref:string}>`
 - Shadowrule support (see https://github.com/janwilmake/shadowfs)
 - Support for [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)
-
-Wishlist:
-
-Let's make the plugin system modular so anyone can make these plugins:
-
 - A plugin for installation of packages
 - A plugin for bundling
 - A plugin that normalizes the imports based on other available paths, and makes more files available if the import references files that weren't available.
