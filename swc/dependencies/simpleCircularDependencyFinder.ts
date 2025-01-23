@@ -1,3 +1,5 @@
+// TODO: in separate repo, create normalisation of imports, and allow endpoint to retrieve all files needed for a given file.
+
 import { getDependenciesPerOperation } from "./getDependenciesPerOperation";
 export type DependencyOperation = {
   operationName: string;

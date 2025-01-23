@@ -45,7 +45,7 @@ TODO:
 
 - ✅ env variables
 - ✅ binaries
-- proxy `/file`
+- proxy `owner/repo/blob/...` to `/file`
 - finish `githubFileContentResponse` and make it all work with all filters
 - test stripe
 - test auth
@@ -96,4 +96,4 @@ It's best to create a function to do this trial and error. This would most likel
 
 # `/tree` endpoint
 
-This can do the fastest possible way of getting the tree/index. Needs rangerequest to be fast.
+This can do the fastest possible way of getting the tree/index. Needs rangerequest to be fast (see poc at `zipobject.range`).

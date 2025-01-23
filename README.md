@@ -23,7 +23,7 @@ Cache Layer (TODO):
 
 Wishlist:
 
-- VSCode-like path-match and in-file search with regex
+- ❗️ VSCode-like path-match and in-file search with regex (especially useful cross-repo!)
 - Support to create a single zip from an object that references multiple zips as `FileEntry<{url:string}>` or `JSON<{$ref:string}>`
 - Shadowrule support (see https://github.com/janwilmake/shadowfs)
 - Support for [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)
