@@ -35,6 +35,8 @@ export type OperationClassification =
   (typeof operationClassificationConst)[number];
 
 export type TsInterfaceProperties = {
+  /** interface or type references parsed if the interface/type is an object */
+  object?: { [key: string]: string };
   /**
    * boolean indicating whether or not this interface uses one or more generic variables
    */

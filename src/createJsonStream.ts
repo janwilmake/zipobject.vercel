@@ -86,11 +86,10 @@ export const createJsonStream = async (options: BallOptions) => {
   }
 
   const outputStream = new PassThrough({ objectMode: true });
+  const cacheStream = new PassThrough({ objectMode: true });
 
   try {
-    // Parse JSON response
     const jsonData = await response.json();
-
     const isFilesObject =
       "files" in jsonData &&
       typeof jsonData.files === "object" &&
@@ -154,13 +153,16 @@ export const createJsonStream = async (options: BallOptions) => {
 
       // Write to output stream
       outputStream.write({ path: filePath, entry: processedEntry });
+      cacheStream.write({ path: filePath, entry: processedEntry });
     }
 
     // End the stream
     outputStream.end();
+    cacheStream.end();
   } catch (error) {
     outputStream.destroy(error as Error);
+    cacheStream.destroy(error as Error);
   }
 
-  return outputStream;
+  return { outputStream, cacheStream };
 };

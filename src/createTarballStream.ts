@@ -34,6 +34,7 @@ export const createTarballStream = async (options: BallOptions) => {
   }
 
   const outputStream = new PassThrough({ objectMode: true });
+  const cacheStream = new PassThrough({ objectMode: true });
   const nodeStream = new PassThrough();
   Readable.fromWeb(response.body as any).pipe(nodeStream);
 
@@ -107,6 +108,7 @@ export const createTarballStream = async (options: BallOptions) => {
           tokenCounter.addFile(data.entry.content);
         }
         outputStream.write(data);
+        cacheStream.write(data);
       });
 
       processor.on("end", () => {
@@ -138,11 +140,14 @@ export const createTarballStream = async (options: BallOptions) => {
         flush(callback) {
           callback();
           outputStream.end();
+          cacheStream.end();
         },
       });
       outputStream.pipe(filteredStream);
+      cacheStream.pipe(filteredStream);
     } else {
       outputStream.end();
+      cacheStream.end();
     }
   });
 
@@ -150,5 +155,5 @@ export const createTarballStream = async (options: BallOptions) => {
     outputStream.destroy(err);
   });
 
-  return outputStream;
+  return { outputStream, cacheStream };
 };

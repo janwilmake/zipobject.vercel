@@ -1,3 +1,4 @@
+import { Readable } from "node:stream";
 import { ReadableStream as WebReadableStream } from "node:stream/web";
 import {
   getZipUrl,
@@ -11,6 +12,90 @@ import { createTarballStream } from "../src/createTarballStream.js";
 import { createZipballStream } from "../src/createZipballStream.js";
 import { createJsonStream } from "../src/createJsonStream.js";
 import { BallOptions } from "../src/types.js";
+import {
+  S3Client,
+  GetObjectCommand,
+  ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
+import { Transform } from "node:stream";
+
+import { Upload } from "@aws-sdk/lib-storage";
+
+const client = new S3Client({
+  region: process.env.AWS_REGION,
+  endpoint: process.env.S3_ENDPOINT,
+});
+
+const cacheGet = async (Prefix: string, filterHashes: string[]) => {
+  const cacheKey = `${Prefix}${filterHashes[0]}.zip`;
+  // todo
+  try {
+    const list = await client.send(
+      new ListObjectsV2Command({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Prefix,
+      }),
+    );
+    console.log({ list });
+
+    const result = await client.send(
+      new GetObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: cacheKey,
+      }),
+    );
+    return { result, error: undefined };
+  } catch (e: any) {
+    return { result: undefined, error: e.message as string };
+  }
+};
+
+const cachePut = async (
+  cacheKey: string,
+  body: Readable,
+  metadata: { [keyof: string]: string },
+) => {
+  try {
+    const parallelUploads3 = new Upload({
+      client,
+      params: {
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: cacheKey,
+        Body: body,
+        Metadata: metadata,
+      },
+
+      // // optional tags
+      // tags: [
+      //   /*...*/
+      // ],
+
+      // // additional optional fields show default values below:
+
+      // // (optional) concurrency configuration
+      // queueSize: 4,
+
+      // // (optional) size of each part, in bytes, at least 5MB
+      // partSize: 1024 * 1024 * 5,
+
+      // // (optional) when true, do not automatically call AbortMultipartUpload when
+      // // a multipart upload fails to complete. You should then manually handle
+      // // the leftover parts.
+      // leavePartsOnError: false,
+    });
+
+    console.log("UPLOAD STARTED");
+    parallelUploads3.on("httpUploadProgress", (progress) => {
+      console.log(progress);
+    });
+
+    const result = await parallelUploads3.done();
+
+    return result;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 const getFilename = (url: string, responseContentType: string): string => {
   const ext =
@@ -101,6 +186,150 @@ function detectFileType(contentType: string | null, url: string): FileType {
   return "unknown";
 }
 
+type SortedFilters = {
+  maxTokens: number | undefined;
+  matchFilenames: string[] | undefined;
+  yamlFilter: string | undefined;
+  maxFileSize: number | undefined;
+  disableGenignore: boolean;
+  excludeDir: string[] | undefined;
+  excludeExt: string[] | undefined;
+  includeDir: string[] | undefined;
+  includeExt: string[] | undefined;
+  allowedPaths: string[] | undefined;
+};
+
+const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
+  // TODO: make it incrementally less specific / more broad
+  const sortedFilterObjects = [sortedFilterObject];
+  // less specific for each path is more broad
+  //  allowedPaths,
+  // disabled is more broad
+  // disableGenignore,
+  // less is more broad
+  //  excludeDir,
+  // less is more broad
+  // excludeExt,
+  // none is most broad, then more is more broad
+  // includeDir,
+  // none is most broad, then more is more broad
+  // includeExt,
+  // not given is most broad, and if given, more files is more broad
+  // matchFilenames,
+  // bigger is more broad, or not given is most.
+  // maxFileSize,
+  // bigger is more broad, or not given is most.
+  // maxTokens,
+  // not given is more broad
+
+  const filterHashes = await Promise.all(
+    sortedFilterObjects.map((obj) => JSON.stringify(obj)).map(hashString),
+  );
+  return filterHashes;
+};
+/** Gets the filters that the cache relies on */
+const getSortedFilters = (
+  url: URL,
+  path: string | undefined,
+): SortedFilters => {
+  const allowedPathsQuery = url.searchParams
+    .getAll("allowedPaths")
+    .sort((a, b) => (b < a ? -1 : 1));
+  const allowedPaths = allowedPathsQuery.length
+    ? allowedPathsQuery
+    : path !== undefined && path !== ""
+    ? [path]
+    : undefined;
+
+  const includeExt = url.searchParams
+    .get("ext")
+    ?.split(",")
+    .map((x) => x.toLowerCase().trim())
+    .sort((a, b) => (b < a ? -1 : 1));
+  const includeDir = url.searchParams
+    .get("dir")
+    ?.split(",")
+    .map((x) => x.toLowerCase().trim())
+    .sort((a, b) => (b < a ? -1 : 1));
+  const excludeExt = url.searchParams
+    .get("exclude-ext")
+    ?.split(",")
+    .map((x) => x.toLowerCase().trim())
+    .sort((a, b) => (b < a ? -1 : 1));
+  const excludeDir = url.searchParams
+    .get("exclude-dir")
+    ?.split(",")
+    .map((x) => x.toLowerCase().trim())
+    .sort((a, b) => (b < a ? -1 : 1));
+
+  const disableGenignore =
+    !url.searchParams.get("disableGenignore") ||
+    url.searchParams.get("disableGenignore") !== "false";
+  const maxFileSize =
+    parseInt(url.searchParams.get("maxFileSize") || "0", 10) || undefined;
+  const maxTokensQuery = url.searchParams.get("maxTokens");
+  const yamlFilter = url.searchParams.get("yamlFilter") || undefined;
+  // match these filenames, case insensitive
+  const matchFilenames = url.searchParams
+    .get("matchFilenames")
+    ?.split(",")
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean)
+    .sort((a, b) => (b < a ? -1 : 1));
+
+  const maxTokens =
+    maxTokensQuery && !isNaN(Number(maxTokensQuery))
+      ? Number(maxTokensQuery)
+      : undefined;
+  return {
+    maxTokens,
+    matchFilenames,
+    yamlFilter,
+    maxFileSize,
+    disableGenignore,
+    excludeDir,
+    excludeExt,
+    includeDir,
+    includeExt,
+    allowedPaths,
+  };
+};
+
+/**
+ * Hashes a string and returns alphanumeric characters (A-Z, a-z, 0-9)
+ * with relatively uniform distribution
+ */
+export async function hashString(str: string): Promise<string> {
+  const buffer = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  // Define our character set
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  // Map each byte to a character in our charset
+  return hashArray
+    .map((byte) => {
+      // Use modulo to map the byte to our charset length
+      const index = byte % charset.length;
+      return charset[index];
+    })
+    .join("");
+}
+
+class UrlResponse extends Response {
+  private _url: string;
+  constructor(body: BodyInit | null, init: ResponseInit & { url: string }) {
+    super(body, init);
+    this._url = init.url;
+  }
+
+  get url() {
+    return this._url;
+  }
+}
+
 export const GET = async (request: Request, context: { waitUntil: any }) => {
   const url = new URL(request.url);
   const apiKey =
@@ -108,7 +337,6 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     request.headers.get("Authorization")?.slice("Bearer ".length);
   const immutableQuery = url.searchParams.get("immutable");
   const pathUrl = url.searchParams.get("pathUrl");
-  const zipType = url.searchParams.get("zipType");
   if (!pathUrl) {
     return new Response("No pathurl", { status: 500 });
   }
@@ -116,7 +344,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   // first, try to get a zip url from the url with a specific format:
   let urlParse: ZipInfo | undefined = undefined;
 
-  const siteUrlParse = await getZipUrl(pathUrl, apiKey);
+  const siteUrlParse = getZipUrl(pathUrl, apiKey);
 
   if ("dataUrl" in siteUrlParse) {
     urlParse = siteUrlParse;
@@ -127,16 +355,11 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       return new Response("Invalid URL: " + pathUrl, { status: 400 });
     }
 
-    const response = await fetch(pathUrl, {
-      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
-    });
-
     urlParse = {
-      response,
+      zipHeaders: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
       dataUrl: pathUrl,
-      rawUrlPrefix: `https://zipobject.com/file/${encodeURIComponent(
-        pathUrl,
-      )}/path`,
+      getRawUrlPrefix: () =>
+        `https://zipobject.com/file/${encodeURIComponent(pathUrl)}/path`,
       immutable: immutableQuery === "true",
       path: undefined,
     };
@@ -146,61 +369,107 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     return new Response("Shouldn't happen", { status: 500 });
   }
 
-  const { dataUrl, immutable, path, rawUrlPrefix, response } = urlParse;
+  const { dataUrl, immutable, path, getRawUrlPrefix, zipHeaders } = urlParse;
 
-  // check if it's a valid url
+  const needChecksum = !immutable || !!zipHeaders;
 
-  //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
-  const disableCache = url.searchParams.get("disableCache") === "true";
-
-  const allowedPathsQuery = url.searchParams.getAll("allowedPaths");
-  const allowedPaths = allowedPathsQuery.length
-    ? allowedPathsQuery
-    : path !== undefined && path !== ""
-    ? [path]
+  const earlyResponse = needChecksum
+    ? await fetch(dataUrl, { headers: zipHeaders })
     : undefined;
+
+  if (earlyResponse && !earlyResponse.ok) {
+    // This way we make sure we don't accidentally provide a cache if we're unauthenticated.
+    return new Response(
+      `Data URL could not be retrieved. Status code: ${earlyResponse.status}
+    
+Data URL: ${dataUrl}`,
+      { status: earlyResponse.status },
+    );
+  }
+
+  const sortedFilters = getSortedFilters(url, path);
+
+  const {
+    allowedPaths,
+    disableGenignore,
+    excludeDir,
+    excludeExt,
+    includeDir,
+    includeExt,
+    matchFilenames,
+    maxFileSize,
+    maxTokens,
+    yamlFilter,
+  } = sortedFilters;
 
   const shouldOmitFiles = url.searchParams.get("omitFiles") === "true";
   // only for JSON
   const shouldOmitTree = url.searchParams.get("omitTree") === "true";
 
-  const plugins = url.searchParams.get("plugins")?.split(",") || [];
-  const includeExt = url.searchParams.get("ext")?.split(",");
-  const includeDir = url.searchParams.get("dir")?.split(",");
-  const excludeExt = url.searchParams.get("exclude-ext")?.split(",");
-  const excludeDir = url.searchParams.get("exclude-dir")?.split(",");
-  const disableGenignore =
-    !url.searchParams.get("disableGenignore") ||
-    url.searchParams.get("disableGenignore") !== "false";
-  const maxFileSize =
-    parseInt(url.searchParams.get("maxFileSize") || "0", 10) || undefined;
-  const maxTokensQuery = url.searchParams.get("maxTokens");
+  const plugins =
+    url.searchParams
+      .get("plugins")
+      ?.split(",")
+      .map((x) => x.toLowerCase().trim())
+      .sort((a, b) => (b < a ? -1 : 1)) || [];
+
+  const disableCache = url.searchParams.get("disableCache") === "true";
+
+  console.time("cache check");
+
+  // NB: not every  zip response has an etag. Thus, we should also look at other things to determine it has changed, or decide not to cache if we just can't know.
+  const checksum =
+    needChecksum && earlyResponse
+      ? earlyResponse.headers.get("etag") ||
+        earlyResponse.headers.get("last-modified") ||
+        earlyResponse.headers.get("content-md5") ||
+        Math.random().toString()
+      : // if the zip is immutable, we must use the headers as a checksum, if present, since different headers may mean different authenticated user
+        JSON.stringify(zipHeaders);
+
+  const dataUrlWithoutProtocol = dataUrl.startsWith("https://")
+    ? dataUrl.slice("https://".length)
+    : dataUrl.startsWith("http://")
+    ? dataUrl.slice("http://".length)
+    : dataUrl;
+  const dataUrlWithoutExt = dataUrlWithoutProtocol.endsWith(".zip")
+    ? dataUrlWithoutProtocol.slice(0, dataUrlWithoutProtocol.length - 4)
+    : dataUrlWithoutProtocol;
+
+  const checksumPart = await hashString(checksum);
+
+  // This already contains the dataURL and the checksum meaning it is authenticated and doesn't get old versions or different files
+  const prefix = `${dataUrlWithoutExt}/${checksumPart}/`;
+  // This ensures we go incrementally more broad if the hash doesn't exist.
+  const filterHashes = await getBroadeningFilterHashes(sortedFilters);
+
+  const cache = await cacheGet(prefix, filterHashes);
+
+  // cache available? response is from cache
+
+  const cacheReadableStream = cache.result?.Body?.transformToWebStream();
+  const isCacheHit = !!cacheReadableStream;
+  // cache not available? resposne is early response or get resposne now....
+
+  const response =
+    cacheReadableStream && cache.result?.Metadata?.url
+      ? new UrlResponse(cacheReadableStream, {
+          url: cache.result?.Metadata.url,
+          // set content-type so 'type' gets determined correctly
+          headers: { "content-type": "application/zip" },
+        })
+      : earlyResponse || (await fetch(dataUrl, { headers: zipHeaders }));
+
+  // check if it's a valid url
+
+  //  TODO: we could already cache immutable zips at this point, instead of just caching after filtering, we could cache instantly when retrieving, but also after the filter.
   const accept =
     url.searchParams.get("accept") || request.headers.get("Accept");
-  const yamlFilter = url.searchParams.get("yamlFilter") || undefined;
-
-  // match these filenames, case insensitive
-  const matchFilenames = url.searchParams
-    .get("matchFilenames")
-    ?.split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-
-  const maxTokens =
-    maxTokensQuery && !isNaN(Number(maxTokensQuery))
-      ? Number(maxTokensQuery)
-      : undefined;
 
   // try it
   if (!response.ok || !response.body) {
     throw new Error(`Failed to fetch data url: ${response.status}`);
   }
-
-  console.log({
-    dataUrl,
-    responseUrl: response.url,
-    redirected: response.redirected,
-  });
 
   const contentType = response.headers.get("content-type");
 
@@ -224,7 +493,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   const options: BallOptions = {
     response,
     omitFirstSegment,
-    rawUrlPrefix,
+    rawUrlPrefix: getRawUrlPrefix(response.url),
     allowedPaths,
     maxTokens,
     immutable,
@@ -239,9 +508,11 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     yamlFilter,
   };
 
+  // console.log({ response, contentType, options, type });
+
   try {
     // Create and set up Node.js streams
-    const contentStream =
+    const { cacheStream, outputStream } =
       type === "tarball"
         ? await createTarballStream(options)
         : type === "zipball"
@@ -277,25 +548,47 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
           });
 
     // Set up the pipeline in Node.js streams
-    const nodeStream = contentStream.pipe(streamHandler);
+    const nodeStream = outputStream.pipe(streamHandler);
+    /* if (!isCacheHit && !disableCache) {
+            console.log("GONNA CACHE");
+            // Create a ZipStreamer to transform the content into a ZIP stream
+            // Pipe the content through the ZipStreamer and then to the cache stream
+            const cachedPipe = cacheStream.pipe(new ZipStreamer());
+            cachedPipe.on("error", (err) => {
+              console.error("Cache stream error:", err);
+            });
+
+            //  const webStream = nodeToWebStream(cachedPipe.pipe(zipStreamer));
+            // Handle errors in the cache stream
+            console.log({ type });
+            // Add the zip result to cache by streaming it there too
+            const result = await cachePut(cacheKey, cachedPipe, {
+              url: response.url,
+            });
+            console.log("PutObjectCommandOutput", { result });
+          }*/
+    const createWebStream = (stream: Transform) => {
+      return new WebReadableStream({
+        async start(controller) {
+          stream.on("data", (chunk) => {
+            controller.enqueue(chunk);
+          });
+          stream.on("end", () => {
+            controller.close();
+          });
+          stream.on("error", (err) => {
+            controller.error(err);
+          });
+        },
+
+        cancel() {
+          stream.destroy();
+        },
+      });
+    };
 
     // Create a web-compatible ReadableStream
-    const webStream = new WebReadableStream({
-      start(controller) {
-        nodeStream.on("data", (chunk) => {
-          controller.enqueue(chunk);
-        });
-        nodeStream.on("end", () => {
-          controller.close();
-        });
-        nodeStream.on("error", (err) => {
-          controller.error(err);
-        });
-      },
-      cancel() {
-        nodeStream.destroy();
-      },
-    });
+    const webStream = createWebStream(nodeStream);
 
     const headers = {
       "Content-Type": responseContentType!,
@@ -313,9 +606,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
             )}"`,
     };
 
-    return new Response(webStream as unknown as BodyInit, {
-      headers,
-    });
+    return new Response(webStream as unknown as BodyInit, { headers });
   } catch (error: any) {
     console.error("Stream processing error:", error);
     return new Response(`Error processing request: ${error.message}`, {

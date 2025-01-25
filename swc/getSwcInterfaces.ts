@@ -1,8 +1,28 @@
-import { ModuleItem } from "@swc/core";
+import { ModuleItem, TsInterfaceBody, TsPropertySignature } from "@swc/core";
 import { FileSpan, SwcInterface } from "./types.js";
 import { notEmpty } from "./util.js";
 import { getModuleItemName } from "./getModuleItemName.js";
 import { getRealSpan } from "./getRealSpan.js";
+
+const parseTsPropertySignature = (tsPropertySignature: TsPropertySignature) => {
+  if (tsPropertySignature.key.type !== "Identifier") {
+    return;
+  }
+  const key = tsPropertySignature.key.value;
+  if (
+    tsPropertySignature.typeAnnotation?.typeAnnotation.type !==
+    "TsTypeReference"
+  ) {
+    return;
+  }
+  const tsEntityName =
+    tsPropertySignature.typeAnnotation?.typeAnnotation.typeName;
+  if (tsEntityName.type === "TsQualifiedName") {
+    return;
+  }
+  const value = tsEntityName.value;
+  return [key, value] as [string, string];
+};
 /**
 For now, gets only names/locations and isExported  :) it's enough
  */
@@ -44,8 +64,45 @@ export const getSwcInterfaces = (
       const length = end - start;
 
       const isExported = moduleItem.type === "ExportDeclaration";
+
+      const tsInterfaceBody: TsInterfaceBody | undefined =
+        moduleItem.type === "ExportDeclaration"
+          ? moduleItem.declaration.type === "TsInterfaceDeclaration"
+            ? moduleItem.declaration.body
+            : undefined
+          : moduleItem.type === "TsInterfaceDeclaration"
+          ? moduleItem.body
+          : undefined;
+
+      const tsType =
+        moduleItem.type === "ExportDeclaration"
+          ? moduleItem.declaration.type === "TsTypeAliasDeclaration"
+            ? moduleItem.declaration.typeAnnotation
+            : undefined
+          : moduleItem.type === "TsTypeAliasDeclaration"
+          ? moduleItem.typeAnnotation
+          : undefined;
+
+      const tsPropertySignatures: TsPropertySignature[] | undefined =
+        tsInterfaceBody
+          ? tsInterfaceBody.body.filter(
+              (element) => element.type === "TsPropertySignature",
+            )
+          : tsType?.type === "TsTypeLiteral"
+          ? tsType.members.filter((x) => x.type === "TsPropertySignature")
+          : undefined;
+
+      const object = tsPropertySignatures
+        ? Object.fromEntries(
+            tsPropertySignatures
+              .map((item) => parseTsPropertySignature(item))
+              .filter((x) => !!x),
+          )
+        : undefined;
+
       const swcInterface: SwcInterface = {
         modelName: "SwcInterface",
+        object,
         name,
         start,
         end,

@@ -7,16 +7,16 @@ export type ZipType = "zipball" | "tarball";
 
 export type ZipInfo = {
   dataUrl: string;
-  rawUrlPrefix: string;
+  getRawUrlPrefix: (responseUrl: string | undefined) => string;
   immutable: boolean;
   path: string | undefined;
-  response: Response;
+  zipHeaders: { [key: string]: string } | undefined;
 };
 /** Parses zip url, headers, and immutability for common package managers and file systems */
-export const getZipUrl = async (
+export const getZipUrl = (
   siteUrl: string,
   apiKey?: string,
-): Promise<ZipInfo | { error: string }> => {
+): ZipInfo | { error: string } => {
   //normalize url
   siteUrl =
     siteUrl.startsWith("https:/") && !siteUrl.startsWith("https://")
@@ -39,15 +39,21 @@ export const getZipUrl = async (
     const wikiRegex = /^([\w-]+)\/([\w-]+)\/wiki(\/.*)?$/;
     const wikiMatch = url.pathname.slice(1).match(wikiRegex);
     if (wikiMatch) {
+      const isPrivate = !!apiKey;
+
+      const zipHeaders = isPrivate
+        ? { Authorization: `Bearer ${apiKey}` }
+        : undefined;
+
       const pathAfterWiki: string = wikiMatch[3]?.slice(1) || "";
       const dataUrl = `https://wikizip.forgithub.com/${owner}/${repo}/wiki`;
-      const response = await fetch(dataUrl);
       return {
         immutable: false,
         dataUrl,
         path: pathAfterWiki,
-        response,
-        rawUrlPrefix: `https://raw.githubusercontent.com/wiki/${owner}/${repo}`,
+        zipHeaders,
+        getRawUrlPrefix: () =>
+          `https://raw.githubusercontent.com/wiki/${owner}/${repo}`,
       };
     }
 
@@ -61,10 +67,10 @@ export const getZipUrl = async (
     const zipHeaders = isPrivate
       ? { Authorization: `token ${apiKey}` }
       : undefined;
-    const response = await fetch(dataUrl, { headers: zipHeaders });
-    const rawUrlPrefix = `https://raw.githubusercontent.com/${owner}/${repo}/${response.url.slice(
-      `https://codeload.github.com/${owner}/${repo}/zip/`.length,
-    )}`;
+    const getRawUrlPrefix = (responseUrl: string | undefined) =>
+      `https://raw.githubusercontent.com/${owner}/${repo}/${responseUrl?.slice(
+        `https://codeload.github.com/${owner}/${repo}/zip/`.length,
+      )}`;
 
     const immutable = isValidGitSHA(branch);
 
@@ -72,8 +78,8 @@ export const getZipUrl = async (
       immutable,
       dataUrl,
       path,
-      rawUrlPrefix,
-      response,
+      getRawUrlPrefix,
+      zipHeaders,
     };
   }
 
@@ -85,15 +91,14 @@ export const getZipUrl = async (
       };
     }
     const dataUrl = `https://registry.npmjs.org/${packageName}/-/${packageName}-${version}.tgz`;
-    const response = await fetch(dataUrl);
 
     // NB: Private packages not supported, for now.
     return {
-      response,
+      zipHeaders: undefined,
       immutable: true,
       dataUrl,
       path: undefined,
-      rawUrlPrefix: `https://unpkg.com/${packageName}@${version}`,
+      getRawUrlPrefix: () => `https://unpkg.com/${packageName}@${version}`,
     };
   }
 
@@ -110,19 +115,20 @@ export const getZipUrl = async (
 
     const [, owner, packageName, version] = match;
     const dataUrl = `https://npm.jsr.io/~/11/@jsr/${owner}__${packageName}/${version}.tgz`;
-    const response = await fetch(dataUrl);
 
     // NB: seems consistent to always be ~11 but let's see
     return {
-      response,
+      zipHeaders: undefined,
       immutable: true,
       dataUrl,
       path: undefined,
-      rawUrlPrefix: `https://jsr.io/@[${owner}/${packageName}/${version}`,
+      getRawUrlPrefix: () =>
+        `https://jsr.io/@[${owner}/${packageName}/${version}`,
     };
   }
   return { error: "URL not supported" };
 };
+
 export const zipPrefixesWithFirstSegmentOmitted = [
   "https://npm.jsr.io/",
   "https://registry.npmjs.org/",

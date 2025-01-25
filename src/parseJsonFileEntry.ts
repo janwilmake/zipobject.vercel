@@ -3,6 +3,12 @@ import TOML from "smol-toml";
 import { FileEntry } from "./types.js";
 import { trySwcParseFile } from "../swc/trySwcParseFile.js";
 import { getTypescriptFileData } from "../swc/getTypescriptFileData.js";
+import {
+  ExportDefaultExpression,
+  KeyValueProperty,
+  Property,
+  SpreadElement,
+} from "@swc/core";
 
 const parseContentToJson = (
   extension: string,
@@ -36,9 +42,19 @@ const parseContentToJson = (
 const parseCode = (
   path: string,
   content: string,
-  config: { imports: boolean; parse: boolean; data: boolean },
+  config: {
+    imports: boolean;
+    parse: boolean;
+    data: boolean;
+    exportDefault: boolean;
+  },
 ) => {
-  if (!config.imports && !config.parse && !config.data) {
+  if (
+    !config.imports &&
+    !config.parse &&
+    !config.data &&
+    !config.exportDefault
+  ) {
     return {};
   }
   const isJavascript =
@@ -76,7 +92,7 @@ const parseCode = (
     };
   }
 
-  if (!config.imports && !config.data) {
+  if (!config.imports && !config.data && !config.exportDefault) {
     console.log("only parse");
     return { parse: parse.result };
   }
@@ -91,12 +107,28 @@ const parseCode = (
     };
   }
 
-  if (!config.imports) {
+  if (!config.imports && !config.exportDefault) {
     return {
       parse: config.parse ? parse.result : undefined,
       data: config.data ? data : undefined,
     };
   }
+
+  const exportDefaultExpression = (
+    parse.result.body.find(
+      (x) => x.type === "ExportDefaultExpression",
+    ) as ExportDefaultExpression
+  )?.expression;
+  const exportDefault =
+    exportDefaultExpression?.type === "ObjectExpression"
+      ? exportDefaultExpression.properties
+          .filter((x) => x.type === "KeyValueProperty")
+          .map((p: any) =>
+            p.key.type === "Identifier" ? p.key.value : undefined,
+          )
+          .filter((x: string | undefined) => !!x)
+          .map((x) => x!)
+      : undefined;
 
   const imports: { [path: string]: string[] } = {};
 
@@ -112,6 +144,7 @@ const parseCode = (
     parse: config.parse ? parse.result : undefined,
     data: config.data ? data : undefined,
     imports: imports,
+    exportDefault,
   };
 };
 export const parseJsonFileEntry = (
@@ -122,14 +155,31 @@ export const parseJsonFileEntry = (
   if (entry.type === "content" && typeof entry.content === "string") {
     const extension = path.split(".").pop()?.toLowerCase() || "";
 
+    const lines = entry.content.split("\n");
+    const firstLineStartComment = lines[0].trim().startsWith("/*");
+    const mainCommentEndIndex = firstLineStartComment
+      ? lines.findIndex((line) => line.includes("*/"))
+      : undefined;
+    const mainCommentRaw =
+      mainCommentEndIndex === undefined
+        ? undefined
+        : lines.slice(0, mainCommentEndIndex + 1).join("\n");
+    const mainComment = mainCommentRaw
+      ? mainCommentRaw.startsWith("/**")
+        ? mainCommentRaw.slice(3, mainCommentRaw.length - 2).trim()
+        : mainCommentRaw.slice(2, mainCommentRaw.length - 2).trim()
+      : undefined;
+
     const code = parseCode(path, entry.content, {
       imports: plugins.includes("imports"),
+      exportDefault: plugins.includes("imports"),
       parse: plugins.includes("parse"),
       data: plugins.includes("data"),
     });
     return {
       ...entry,
       ...code,
+      mainComment: plugins.includes("imports") ? mainComment : undefined,
       json: parseContentToJson(extension, entry.content),
     };
   }

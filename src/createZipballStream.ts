@@ -18,6 +18,7 @@ export const createZipballStream = async (options: BallOptions) => {
     ...filterOptions
   } = options;
 
+  const readableStream = response.body;
   // Initialize token counter
   const tokenCounter = new TokenCounter(maxTokens);
 
@@ -32,8 +33,9 @@ export const createZipballStream = async (options: BallOptions) => {
   }
 
   const outputStream = new PassThrough({ objectMode: true });
+  const cacheStream = new PassThrough({ objectMode: true });
   const nodeStream = new PassThrough();
-  Readable.fromWeb(response.body as any).pipe(nodeStream);
+  Readable.fromWeb(readableStream as any).pipe(nodeStream);
 
   let genignoreString: string | null = null;
   const unzipStream = nodeStream.pipe(Parse());
@@ -100,6 +102,7 @@ export const createZipballStream = async (options: BallOptions) => {
         tokenCounter.addFile(data.entry.content);
       }
       outputStream.write(data);
+      cacheStream.write(data);
     });
 
     processor.on("end", () => {
@@ -131,13 +134,16 @@ export const createZipballStream = async (options: BallOptions) => {
         },
       });
       outputStream.pipe(filteredStream);
+      cacheStream.pipe(filteredStream);
     }
     outputStream.end();
+    cacheStream.end();
   });
 
   unzipStream.on("error", (err) => {
     outputStream.destroy(err);
+    cacheStream.destroy(err);
   });
 
-  return outputStream;
+  return { outputStream, cacheStream };
 };

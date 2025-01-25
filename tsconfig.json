@@ -8,6 +8,7 @@
     "target": "ES2015",
     "lib": ["es2015", "DOM"],
     "strict": true,
+    "strictNullChecks": true,
     "types": ["node"]
   }
 }

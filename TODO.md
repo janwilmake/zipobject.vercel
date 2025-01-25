@@ -1,12 +1,64 @@
 # Cache
 
-- Cache based on KEY `(immutable && !auth ? url : source-etag) + filters sorted`.
-- If cache-hit, use that as source, and apply desired streamer with plugins
-- Cache as ZIP on R2 by streaming the zip streamer to there if there's no cache-hit.
-- For private repos, allow prop `disableCache`
+- ✅ Cache based on KEY `(immutable && !auth ? url : source-etag) + filters sorted`.
+- ✅ If cache-hit, use that as source, and apply desired streamer with plugins
+- ✅ Cache as ZIP on R2 by streaming the zip streamer to there if there's no cache-hit.
+- ✅ For private repos, allow prop `disableCache`
 - BONUS: Figure out a way to also look for incrementally broadening filters to see if we have a broader filter cached
 
 Having this allows direct doc viewing from uithub, but much faster (replacing https://docs.uithub.com logic)
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
+
+#
 
 # Confirm
 

@@ -21,6 +21,8 @@ export interface FileEntry {
   json?: any;
   /**imported names */
   imports?: null | { [path: string]: string[] };
+  exportDefault?: string[];
+  mainComment?: string;
   /**swc-parse */
   parse?: null | SwcFileParse;
   /**swc parse for code-files, parsed to statements and imports */
