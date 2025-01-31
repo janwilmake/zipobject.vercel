@@ -378,13 +378,26 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     : undefined;
 
   if (earlyResponse && !earlyResponse.ok) {
-    // This way we make sure we don't accidentally provide a cache if we're unauthenticated.
-    return new Response(
-      `Data URL could not be retrieved. Status code: ${earlyResponse.status}
+    try {
+      const text = await earlyResponse.text();
+      // This way we make sure we don't accidentally provide a cache if we're unauthenticated.
+      return new Response(
+        `Data URL could not be retrieved. Status code: ${earlyResponse.status}
     
-Data URL: ${dataUrl}`,
-      { status: earlyResponse.status },
-    );
+Data URL: ${dataUrl}
+
+Text:
+${text}`,
+        { status: earlyResponse.status },
+      );
+    } catch (e) {
+      return new Response(
+        `Data URL could not be retrieved. Status code: ${earlyResponse.status}
+      
+  Data URL: ${dataUrl}`,
+        { status: earlyResponse.status },
+      );
+    }
   }
 
   const sortedFilters = getSortedFilters(url, path);
