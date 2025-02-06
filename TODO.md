@@ -1,25 +1,10 @@
-# Zip Object Improvement
-
-✅ Improve memory footprint of JSONStreamer and JSONSequenceStreamer
-
-✅ Build markdown streamer, yaml streamer
-
-✅ Support uithub as zipobject domain leading to the same as github
-
-Confirm llmtext.com forwards to markdownstreamer, so we keep streaming.
-
-Adhere to `maxTokens`
-
-Add ability for `head` request
+# More
 
 Confirm all filters work properly now
 
-html streamer
+HTML streamer
 
-- Ensure the thing doesn't crash when files are empty (or other reasons)
-- `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
-
-When done, `uithub.chat` v1 is ready to show to the world!
+Ensure the thing doesn't crash when files are empty (or other reasons)
 
 # Cache
 

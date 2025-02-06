@@ -103,3 +103,17 @@ import { trySwcParseFile } from "../swc/trySwcParseFile";
 ✅ Internalize types that came from `edge-util`
 
 ✅ Ensure paths are available, or skip normalization as it's a jsconfig/tsconfig-dependent spec. Hard to really get right. **skipped**
+
+# Zip Object Improvement (February 6th, 2025)
+
+✅ Improve memory footprint of JSONStreamer and JSONSequenceStreamer
+
+✅ Build markdown streamer, yaml streamer
+
+✅ Support uithub as zipobject domain leading to the same as github
+
+✅ Confirm llmtext.com forwards to markdownstreamer, so we keep streaming.
+
+Adhere to `maxTokens`
+
+When done, `uithub.chat` v1 is ready to show to the world (ensure 25k tokenlimit is applied to be ok with all models)
