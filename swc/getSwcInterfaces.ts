@@ -85,18 +85,21 @@ export const getSwcInterfaces = (
 
       const tsPropertySignatures: TsPropertySignature[] | undefined =
         tsInterfaceBody
-          ? tsInterfaceBody.body.filter(
-              (element) => element.type === "TsPropertySignature",
-            )
+          ? tsInterfaceBody.body
+              .filter((element) => element.type === "TsPropertySignature")
+              .map((x) => x as TsPropertySignature)
           : tsType?.type === "TsTypeLiteral"
-          ? tsType.members.filter((x) => x.type === "TsPropertySignature")
+          ? tsType.members
+              .filter((x) => x.type === "TsPropertySignature")
+              .map((x) => x as TsPropertySignature)
           : undefined;
 
       const object = tsPropertySignatures
         ? Object.fromEntries(
             tsPropertySignatures
               .map((item) => parseTsPropertySignature(item))
-              .filter((x) => !!x),
+              .filter((x) => !!x)
+              .map((x) => x as [string, string]),
           )
         : undefined;
 

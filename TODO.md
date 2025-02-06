@@ -1,3 +1,18 @@
+# Zip Object Improvement
+
+Add ability for `head` request
+
+For github stuff we now get JSON, we want markdown. Add markdown-reader for zipobject and confirm llmtext forwards to it so we keep streaming.
+
+Support uithub as zipobject domain leading to the same as github (perform redirect).
+
+- Adhere to `maxTokens`
+- Confirm all filters work properly now
+- Ensure the thing doesn't crash when files are empty (or other reasons)
+- `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
+
+When done, `uithub.chat` v1 is ready to show to the world!
+
 # Cache
 
 - ✅ Cache based on KEY `(immutable && !auth ? url : source-etag) + filters sorted`.
@@ -12,68 +27,12 @@ To not decrease speed, add a waitUntil that schedules execution of the same URL 
 
 Place R2 in same place as the Vercel function: WEUR so it's fast with cache.
 
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
 # Parsing
 
 - ✅ also parse `mainComment`
 - ✅ also parse `exportDefault:string[]` object properties
 - ✅ also parse `data` interface object key values!
 - TODO: also parse non-references incase it's a primitive such as string,number,boolean.
-
-# Confirm
-
-- Adhere to `maxTokens`
-- Confirm all filters work properly now
-- Ensure the thing doesn't crash when files are empty (or other reasons)
 
 # Fetch built-in
 
@@ -85,7 +44,6 @@ Place R2 in same place as the Vercel function: WEUR so it's fast with cache.
 These can be made separately as open source packages, to encourage others to build more.
 
 - `YAMLStreamer`
-- `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
 - `HTMLStreamer` (very opinionated)
 
 These streamers could be made within ZipObject itself, or separated, since they're easily built on top of the `JSONSequenceStreamer`. This allows greater degree of modularity. Good challenge to create a streaming api over streaming api.
@@ -110,7 +68,7 @@ TODO:
 - finish `githubFileContentResponse` and make it all work with all filters
 - test stripe
 - test auth
-- replace uithub with it if i feel comfortable
+- replace uithub with it if I feel comfortable
 
 After I get it up to the desired quality level again:
 
@@ -129,7 +87,25 @@ However, if the analysis isn't available yet, ensure we'll return 402 payment re
 
 Implement the `cacheControl` in `forgithub.analysis`; every time a scope is altered it needs to be configured to actually be up-to-date according to the strategy. analysis.github.com should never respond with data that wasn't generated yet. Now, figure out how I can basically show all filters and filter transforms in uithub for any repo. To do this, let's first simplify uithub by using zipobject. Then, I can work with what I find in https://analysis.forgithub.com/janwilmake/fetch-each/ids and parse over that. It's just switching the [page] in the fetch url.
 
+# Integrate threads, commits, and repos/[owner]
+
+- owner/repo/issues
+- owner/repo/pulls
+- owner/repo/discussions
+- owner/repo/commits
+- repos/owner: all repos as giant file object
+
+# `/tree` endpoint
+
+This can do the fastest possible way of getting the tree/index. Needs rangerequest to be fast (see poc at `zipobject.range`).
+
+# binary urls for private repos
+
+These should not use the raw.githubusercontent, but rather `zipboject.com/file`
+
 # Improve zip finding and binary urls
+
+Issue: not all branches are accessible. Many will actually give a dead link, which is problematic!
 
 Possible github URLs in browser:
 
@@ -146,15 +122,3 @@ Two strategies are possible to figure out the zip url and raw url:
 2. use `git.listServerRefs`. If we cache it and But this easily takes half a second...
 
 It's best to create a function to do this trial and error. This would most likely just be ratelimited by 5000 req/hour/ip. Additionally we could cache the tagnames and branchnames - but not the shas they're tied to. However, I don't think this is worth the additional complexity as the amount of trials before a hit is likely between 2-3 on average (assuming we start with 2 in parallel).
-
-# Integrate threads, commits, and repos/[owner]
-
-- owner/repo/issues
-- owner/repo/pulls
-- owner/repo/discussions
-- owner/repo/commits
-- repos/owner: all repos as giant file object
-
-# `/tree` endpoint
-
-This can do the fastest possible way of getting the tree/index. Needs rangerequest to be fast (see poc at `zipobject.range`).
