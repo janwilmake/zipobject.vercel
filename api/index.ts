@@ -6,6 +6,9 @@ import {
   zipPrefixesWithFirstSegmentOmitted,
 } from "../src/getZipUrl.js";
 import { JSONStreamer } from "../src/JSONStreamer.js";
+import { MarkdownStreamer } from "../src/MarkdownStreamer.js";
+// import { HTMLStreamer } from "../src/HTMLStreamer.js";
+import { YAMLStreamer } from "../src/YAMLStreamer.js";
 import { JSONSequenceStreamer } from "../src/JSONSequenceStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
 import { createTarballStream } from "../src/createTarballStream.js";
@@ -537,17 +540,42 @@ ${text}`,
       "application/json",
       "application/zip",
       "application/json-seq",
+      "text/yaml",
+      "text/markdown",
+      "text/html",
     ];
     const responseContentType =
       accept && possibleResponseTypes.includes(accept)
         ? accept
         : possibleResponseTypes[0];
 
+    console.log({ responseContentType, accept });
     const streamHandler =
       responseContentType === "application/zip"
         ? new ZipStreamer()
         : responseContentType === "application/json-seq"
         ? new JSONSequenceStreamer({
+            shouldOmitFiles,
+            shouldOmitTree,
+            disableGenignore,
+            plugins,
+          })
+        : responseContentType === "text/yaml"
+        ? new YAMLStreamer({
+            shouldOmitFiles,
+            shouldOmitTree,
+            disableGenignore,
+            plugins,
+          })
+        : responseContentType === "text/markdown"
+        ? new MarkdownStreamer({
+            shouldOmitFiles,
+            shouldOmitTree,
+            disableGenignore,
+            plugins,
+          })
+        : responseContentType === "text/html"
+        ? new MarkdownStreamer({
             shouldOmitFiles,
             shouldOmitTree,
             disableGenignore,
@@ -604,19 +632,19 @@ ${text}`,
     const webStream = createWebStream(nodeStream);
 
     const headers = {
-      "Content-Type": responseContentType!,
+      "Content-Type": responseContentType + ";charset=utf8",
       "Transfer-Encoding": "chunked",
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": immutable
         ? "public, max-age=31536000, immutable"
         : "no-cache",
       "Content-Disposition":
-        responseContentType === "application/json"
-          ? "inline"
-          : `attachment; filename="${getFilename(
+        responseContentType === "application/zip"
+          ? `attachment; filename="${getFilename(
               pathUrl,
               responseContentType,
-            )}"`,
+            )}"`
+          : "inline",
     };
 
     return new Response(webStream as unknown as BodyInit, { headers });

@@ -1,13 +1,21 @@
 # Zip Object Improvement
 
+✅ Improve memory footprint of JSONStreamer and JSONSequenceStreamer
+
+✅ Build markdown streamer, yaml streamer
+
+✅ Support uithub as zipobject domain leading to the same as github
+
+Confirm llmtext.com forwards to markdownstreamer, so we keep streaming.
+
+Adhere to `maxTokens`
+
 Add ability for `head` request
 
-For github stuff we now get JSON, we want markdown. Add markdown-reader for zipobject and confirm llmtext forwards to it so we keep streaming.
+Confirm all filters work properly now
 
-Support uithub as zipobject domain leading to the same as github (perform redirect).
+html streamer
 
-- Adhere to `maxTokens`
-- Confirm all filters work properly now
 - Ensure the thing doesn't crash when files are empty (or other reasons)
 - `MarkdownStreamer` (stream tree and files separately, so the tree comes first)
 
@@ -40,11 +48,6 @@ Place R2 in same place as the Vercel function: WEUR so it's fast with cache.
 - For `ZipStreamer`, fetch binary data where only a url is present (incase of fileobject input) - max 1000 subrequests and concurrency will be a major limitation here!
 
 # Other streamers
-
-These can be made separately as open source packages, to encourage others to build more.
-
-- `YAMLStreamer`
-- `HTMLStreamer` (very opinionated)
 
 These streamers could be made within ZipObject itself, or separated, since they're easily built on top of the `JSONSequenceStreamer`. This allows greater degree of modularity. Good challenge to create a streaming api over streaming api.
 

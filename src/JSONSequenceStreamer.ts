@@ -10,25 +10,22 @@ const CHARACTERS_PER_TOKEN = 5;
 const RS = Buffer.from([0x1e]); // Record Separator
 const LF = Buffer.from([0x0a]); // Line Feed
 
-function filePathToNestedObject<T, U>(
-  flatObject: { [filepath: string]: T },
-  mapper: (value: T) => U,
-): NestedObject<U> {
-  const result: NestedObject<U> = {};
+function filePathToNestedObject(paths: string[]): NestedObject<null> {
+  const result: NestedObject<null> = {};
 
-  for (const [path, value] of Object.entries(flatObject)) {
+  for (const path of paths) {
     let parts = path.split("/");
     parts = parts[0] === "" ? parts.slice(1) : parts;
 
-    let current: NestedObject<U> = result;
+    let current: NestedObject<null> = result;
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
       if (i === parts.length - 1) {
-        current[part] = mapper(value);
+        current[part] = null;
       } else {
-        current[part] = (current[part] as NestedObject<U>) || {};
-        current = current[part] as NestedObject<U>;
+        current[part] = (current[part] as NestedObject<null>) || {};
+        current = current[part] as NestedObject<null>;
       }
     }
   }
@@ -46,7 +43,8 @@ interface SizeStats {
 }
 
 export class JSONSequenceStreamer extends Transform {
-  private files: { [path: string]: FileEntry } = {};
+  //private files: { [path: string]: FileEntry } = {};
+  private paths: string[] = [];
   private fileCount = 0;
   private totalCharacters = 0;
   private totalLines = 0;
@@ -88,7 +86,7 @@ export class JSONSequenceStreamer extends Transform {
       );
 
       // Store the file entry and update counts
-      this.files[chunk.path] = parsedEntry;
+      this.paths.push(chunk.path);
       this.fileCount++;
 
       if (parsedEntry.type === "content" && parsedEntry.content) {
@@ -115,7 +113,7 @@ export class JSONSequenceStreamer extends Transform {
     try {
       // Add tree if not omitted
       if (!this.options.shouldOmitTree) {
-        const tree = filePathToNestedObject(this.files, () => null);
+        const tree = filePathToNestedObject(this.paths);
         this.writeJSONSequence({
           type: "tree",
           tree,

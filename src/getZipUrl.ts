@@ -31,7 +31,10 @@ export const getZipUrl = (
     return { error: "Can't parse URL" };
   }
 
-  if (siteUrl.startsWith("https://github.com/")) {
+  if (
+    siteUrl.startsWith("https://github.com/") ||
+    siteUrl.startsWith("https://uithub.com/")
+  ) {
     const [owner, repo, page, branch, ...pathChunks] = url.pathname
       .slice(1)
       .split("/");
