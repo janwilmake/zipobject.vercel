@@ -8,6 +8,7 @@
       "source": "/file/:zipUrl/path/:path*",
       "destination": "/api/file.ts"
     },
+
     {
       "source": "/:pathUrl*",
       "destination": "/api/index.ts"

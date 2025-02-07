@@ -376,8 +376,9 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
 
   const needChecksum = !immutable || !!zipHeaders;
 
+  console.log({ needChecksum, zipHeaders, dataUrl });
   const earlyResponse = needChecksum
-    ? await fetch(dataUrl, { headers: zipHeaders })
+    ? await fetch(dataUrl, { method: "GET", headers: zipHeaders })
     : undefined;
 
   if (earlyResponse && !earlyResponse.ok) {
@@ -385,7 +386,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
       const text = await earlyResponse.text();
       // This way we make sure we don't accidentally provide a cache if we're unauthenticated.
       return new Response(
-        `Data URL could not be retrieved. Status code: ${earlyResponse.status}
+        `Data URL could not be retrieved. Status code: ${earlyResponse.status} - ${earlyResponse.statusText}
     
 Data URL: ${dataUrl}
 

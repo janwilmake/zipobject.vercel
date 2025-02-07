@@ -15,3 +15,7 @@ Especially jsdelivr functionality comes close!
 - They have a whole bunch of package stats endpoints, focusing mostly on bandwidth and usage (not stars or other activity). Also their usage anlytics are all public showing countries, browsers, etc. Very interesting!
 
 However, all of the above focus on serving single files mostly, and don't have easy-to-use endpoints to get it all in one go. That's what makes zipobject interesting. Furthermore, the filtering and search is something completely new.
+
+# Gitlab support
+
+Gitlab zip archives requests don't get accepted from vercel - see `gitlab.test.ts`; https://github.com/vercel/vercel/issues/13033

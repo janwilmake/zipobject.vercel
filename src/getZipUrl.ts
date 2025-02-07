@@ -31,8 +31,8 @@ export const getZipUrl = (
     return { error: "Can't parse URL" };
   }
 
-  if (siteUrl.startsWith("https://gitlab.com")) {
-    // https://gitlab.com/gitlab-com/sales-team/japan-gtm-team/public-group/git-essentials-hands-on-jp[/-/tree/master/...path]
+  if (siteUrl.startsWith("https://gitlab.com") && !siteUrl.endsWith(".zip")) {
+    // NB: Gitlab doesn't work in Vercel somehow: https://github.com/vercel/vercel/issues/13033
 
     const [owner, ...pathChunks] = url.pathname.slice(1).split("/");
     if (pathChunks.length === 0) {
@@ -46,12 +46,28 @@ export const getZipUrl = (
     const [page, branch, ...pathParts] = (
       projectPath ? projectPath.split("/") : []
     ) as (string | undefined)[];
+    if (page === "archive") {
+      return { error: "Zip already provided" };
+    }
     const repo = project.split("/").pop();
     const path = pathParts.length > 0 ? pathParts.join("/") : undefined;
     const realBranch = branch || "main";
 
     const isPrivate = !!apiKey;
-    const zipHeaders = { Accept: "*/*" };
+    const zipHeaders = {
+      // Accept: "*/*",
+      // //"User-Agent": "curl/8.7.1",
+      // Host: "gitlab.com",
+
+      Accept: "*/*",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Accept-Language": "en-US,en;q=0.9",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+      Connection: "keep-alive",
+    };
 
     const getRawUrlPrefix = (responseUrl: string | undefined) =>
       `https://gitlab.com/${owner}/${project}/-/raw/${realBranch}/${path}`;
