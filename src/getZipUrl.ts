@@ -51,7 +51,7 @@ export const getZipUrl = (
     const realBranch = branch || "main";
 
     const isPrivate = !!apiKey;
-    const zipHeaders = undefined;
+    const zipHeaders = { Accept: "*/*" };
 
     const getRawUrlPrefix = (responseUrl: string | undefined) =>
       `https://gitlab.com/${owner}/${project}/-/raw/${realBranch}/${path}`;
