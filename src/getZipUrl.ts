@@ -58,7 +58,7 @@ export const getZipUrl = (
 
     const immutable = isValidGitSHA(realBranch);
 
-    const dataUrl = `https://gitlab.com/${owner}/${project}/-/archive/${realBranch}/${repo}.zip`;
+    const dataUrl = `https://gitlab.com/${owner}/${project}/-/archive/${realBranch}/${repo}-${realBranch}.zip`;
     return {
       immutable,
       dataUrl,
