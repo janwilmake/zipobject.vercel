@@ -31,6 +31,43 @@ export const getZipUrl = (
     return { error: "Can't parse URL" };
   }
 
+  if (siteUrl.startsWith("https://gitlab.com")) {
+    // https://gitlab.com/gitlab-com/sales-team/japan-gtm-team/public-group/git-essentials-hands-on-jp[/-/tree/master/...path]
+
+    const [owner, ...pathChunks] = url.pathname.slice(1).split("/");
+    if (pathChunks.length === 0) {
+      return { error: "Must provide more than just owner" };
+    }
+    const [project, projectPath] = pathChunks.join("/").split("/-/") as [
+      string,
+      string | undefined,
+    ];
+
+    const [page, branch, ...pathParts] = (
+      projectPath ? projectPath.split("/") : []
+    ) as (string | undefined)[];
+    const repo = project.split("/").pop();
+    const path = pathParts.length > 0 ? pathParts.join("/") : undefined;
+    const realBranch = branch || "main";
+
+    const isPrivate = !!apiKey;
+    const zipHeaders = undefined;
+
+    const getRawUrlPrefix = (responseUrl: string | undefined) =>
+      `https://gitlab.com/${owner}/${project}/-/raw/${realBranch}/${path}`;
+
+    const immutable = isValidGitSHA(realBranch);
+
+    const dataUrl = `https://gitlab.com/${owner}/${project}/-/archive/${realBranch}/${repo}.zip`;
+    return {
+      immutable,
+      dataUrl,
+      path,
+      getRawUrlPrefix,
+      zipHeaders,
+    };
+  }
+
   if (
     siteUrl.startsWith("https://github.com/") ||
     siteUrl.startsWith("https://uithub.com/")

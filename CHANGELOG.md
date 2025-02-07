@@ -114,6 +114,6 @@ import { trySwcParseFile } from "../swc/trySwcParseFile";
 
 ✅ Confirm llmtext.com forwards to markdownstreamer, so we keep streaming.
 
-Adhere to `maxTokens`
+✅ Adhere to `maxTokens`
 
-When done, `uithub.chat` v1 is ready to show to the world (ensure 25k tokenlimit is applied to be ok with all models)
+✅ uithub-chat: ensure 25k tokenlimit is applied to be ok with all models
