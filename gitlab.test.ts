@@ -4,7 +4,10 @@ export const GET = async () => {
     Math.random();
 
   console.log({ url });
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    // find at https://gitlab.com/-/user_settings/personal_access_tokens
+    headers: { "private-token": "" },
+  })
     .then(async (res) => {
       if (!res.ok) {
         const text = await res.text();
@@ -24,6 +27,7 @@ export const GET = async () => {
   return new Response("OK?");
 };
 
+// GET();
 // export default {
 //   fetch: GET,
 // };
