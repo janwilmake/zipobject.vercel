@@ -7,7 +7,7 @@ import {
 } from "../src/getZipUrl.js";
 import { JSONStreamer } from "../src/JSONStreamer.js";
 import { MarkdownStreamer } from "../src/MarkdownStreamer.js";
-// import { HTMLStreamer } from "../src/HTMLStreamer.js";
+import { HTMLStreamer } from "../src/HTMLStreamer.js";
 import { YAMLStreamer } from "../src/YAMLStreamer.js";
 import { JSONSequenceStreamer } from "../src/JSONSequenceStreamer.js";
 import { ZipStreamer } from "../src/ZipStreamer.js";
@@ -576,7 +576,10 @@ ${text}`,
             plugins,
           })
         : responseContentType === "text/html"
-        ? new MarkdownStreamer({
+        ? new HTMLStreamer({
+            href: url.toString(),
+            shouldAddLineNumbers: true,
+            ogImageUrl: "",
             shouldOmitFiles,
             shouldOmitTree,
             disableGenignore,
@@ -634,6 +637,8 @@ ${text}`,
 
     const headers = {
       "Content-Type": responseContentType + ";charset=utf8",
+      "X-XSS-Protection": "1; mode=block",
+      "X-Frame-Options": "DENY",
       "Transfer-Encoding": "chunked",
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": immutable

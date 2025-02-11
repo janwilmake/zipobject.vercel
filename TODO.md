@@ -1,10 +1,21 @@
-# More
+# More (2025-02-11)
 
-Confirm all filters work properly now
-
-HTML streamer
+- ✅ HTML streamer
+- ✅ Ensure that it immediately streams the start of the html file, so we have an immediate response
+- Add loading indicator whilst loading that's hidden at the end
+- Ensure it would work for any zip (not only gitub. lets provide original content url)
+- Ensure tokens render
+- Ensure HTML works correctly from any base URL (data.url should be provided with zipobject)
+- Add [LLM Filter] button to headerbar, which prompts message and redirects to filter.zipobject.com
+- Confirm the response is same HTML now in browsers.
+- Confirm all filters work properly now
 
 Ensure the thing doesn't crash when files are empty (or other reasons)
+
+# Stream directly from github
+
+- Figure out how to parse index immediately for a `.tar.gz` file
+- Use tar.gz url instead!
 
 # Cache
 
