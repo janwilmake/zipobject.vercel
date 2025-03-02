@@ -78,11 +78,6 @@ interface SizeStats {
   lines: number;
 }
 
-interface StoredFile {
-  path: string;
-  entry: FileEntry;
-}
-
 export type NestedObject<T = null> = {
   [key: string]: NestedObject<T> | T;
 };
