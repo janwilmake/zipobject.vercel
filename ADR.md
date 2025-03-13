@@ -19,3 +19,7 @@ However, all of the above focus on serving single files mostly, and don't have e
 # Gitlab support
 
 Gitlab zip archives requests don't get accepted from vercel - see `gitlab.test.ts`; https://github.com/vercel/vercel/issues/13033
+
+# Moving to cloudflare
+
+It's not worth replacing swc with acorn and running zipjs in a Durable object even though this could allow me to migrate to cloudflare from vercel. Rather than that, just use free vercel for now and start paying if it gets too much. The business should evolve if it can ask questions!

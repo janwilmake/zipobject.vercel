@@ -12,11 +12,6 @@
 
 Ensure the thing doesn't crash when files are empty (or other reasons)
 
-# Stream directly from github
-
-- Figure out how to parse index immediately for a `.tar.gz` file
-- Use tar.gz url instead!
-
 # Cache
 
 - ✅ Cache based on KEY `(immutable && !auth ? url : source-etag) + filters sorted`.
@@ -56,18 +51,6 @@ Especially making a good HTML streamer is going to be very interesting to get ri
 In uithub, it should be called when page is `blob`, but in zipobject it's a separate endpoint.
 
 # UITHUB v2
-
-Then... use zipobject at new uithub version, hosted at cloudflare. Has huge downstream impact... Let's build this! Open source would be good for the world. Revamp to CloudFlare! Make it ready for open source too!
-
-TODO:
-
-- ✅ env variables
-- ✅ binaries
-- proxy `owner/repo/blob/...` to `/file`
-- finish `githubFileContentResponse` and make it all work with all filters
-- test stripe
-- test auth
-- replace uithub with it if I feel comfortable
 
 After I get it up to the desired quality level again:
 
