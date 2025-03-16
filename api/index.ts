@@ -335,9 +335,24 @@ class UrlResponse extends Response {
 
 export const GET = async (request: Request, context: { waitUntil: any }) => {
   const url = new URL(request.url);
-  const apiKey =
-    url.searchParams.get("apiKey") ||
-    request.headers.get("Authorization")?.slice("Bearer ".length);
+
+  const apiKey = request.headers.get("Authorization")?.slice("Bearer ".length);
+
+  if (
+    !apiKey ||
+    apiKey !== process.env.ADMIN_SECRET ||
+    !process.env.ADMIN_SECRET
+  ) {
+    return new Response(
+      !process.env.ADMIN_SECRET
+        ? "No admin secret set"
+        : "Invalid admin secret provided",
+      { status: 401 },
+    );
+  }
+
+  const zipApiKey = request.headers.get("X-Zip-api-key") || undefined;
+
   const immutableQuery = url.searchParams.get("immutable");
   const pathUrl = url.searchParams.get("pathUrl");
   if (!pathUrl) {
@@ -347,7 +362,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   // first, try to get a zip url from the url with a specific format:
   let urlParse: ZipInfo | undefined = undefined;
 
-  const siteUrlParse = getZipUrl(pathUrl, apiKey);
+  const siteUrlParse = getZipUrl(pathUrl, zipApiKey);
 
   if ("dataUrl" in siteUrlParse) {
     urlParse = siteUrlParse;
@@ -359,7 +374,9 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     }
 
     urlParse = {
-      zipHeaders: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
+      zipHeaders: zipApiKey
+        ? { Authorization: `Bearer ${zipApiKey}` }
+        : undefined,
       dataUrl: pathUrl,
       getRawUrlPrefix: () =>
         `https://zipobject.com/file/${encodeURIComponent(pathUrl)}/path`,

@@ -1,6 +1,7 @@
 # Zipobject Monetisation
 
-- Zipobject vercel should just be admin-authorized https://zipobject.vercel.app, whereas zipobject.com should be at cloudflare and proxy it with monetisation looking at response content size and charge $0.20/GB.
+- Zipobject vercel should just be admin-authorized https://zipobject.vercel.app
+- whereas zipobject.com should be at cloudflare and proxy it with monetisation looking at response content size and charge $0.20/GB.
 - Public repos is as cheap as possible (see cost vercel), private repos cost is 10x (profit is here)
 - Ensure zip URL authorization can be provided in `X-ZIP-Authorization` header only.
 - ❗️ Ensure zipobject doesn't cache private repos! This may be a challenge. ❗️
