@@ -351,8 +351,7 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
     );
   }
 
-  const zipApiKey = request.headers.get("X-Zip-api-key") || undefined;
-
+  const zipApiKey = request.headers.get("x-zip-api-key") || undefined;
   const immutableQuery = url.searchParams.get("immutable");
   const pathUrl = url.searchParams.get("pathUrl");
   if (!pathUrl) {

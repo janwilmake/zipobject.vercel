@@ -1,10 +1,12 @@
-# Zipobject Monetisation
+# MVP
 
-- Zipobject vercel should just be admin-authorized https://zipobject.vercel.app
-- whereas zipobject.com should be at cloudflare and proxy it with monetisation looking at response content size and charge $0.20/GB.
-- Public repos is as cheap as possible (see cost vercel), private repos cost is 10x (profit is here)
-- Ensure zip URL authorization can be provided in `X-ZIP-Authorization` header only.
-- ❗️ Ensure zipobject doesn't cache private repos! This may be a challenge. ❗️
+- Add new functionality for includeFiles, excludeFiles, search, matchCase, useRegex
+- exclude-dir bug: https://x.com/jhogervorst/status/1900128634926514640
+- Bug with spaces: https://x.com/janwilmake/status/1898753253988253946
+- Binary urls for private repos: These should not use the raw.githubusercontent, but rather `zipboject.com/file`. Either that or ensure its clear how to access with raw.githubusercontent. can still be done with api key i guess and maybe it's just best.
+- Ensure the thing doesn't crash when files are empty (or other reasons)
+- Ensure zipobject doesn't cache private repos! This may be a challenge. How to know this!? Look at zip location
+- Public repos is as cheap as possible (see cost vercel), private repos cost is 10x (profit is here). We can do this if we add a `x-is-private-resource` response header.
 
 # `/file` endpoint
 
@@ -15,11 +17,3 @@ Make https://file.zipobject.com work, or zipobject.com/file (to get a specific f
 In forgithub.context, it should be called when page is `blob`, but in zipobject it's a separate endpoint.
 
 In forgithub.context, proxy `owner/repo/blob/...` to `/file`.
-
-# MVP
-
-- Add new functionality for includeFiles, excludeFiles, search, matchCase, useRegex
-- exclude-dir bug: https://x.com/jhogervorst/status/1900128634926514640
-- Bug with spaces: https://x.com/janwilmake/status/1898753253988253946
-- binary urls for private repos: These should not use the raw.githubusercontent, but rather `zipboject.com/file`
-- Ensure the thing doesn't crash when files are empty (or other reasons)
