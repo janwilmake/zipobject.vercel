@@ -117,3 +117,22 @@ import { trySwcParseFile } from "../swc/trySwcParseFile";
 ✅ Adhere to `maxTokens`
 
 ✅ uithub-chat: ensure 25k tokenlimit is applied to be ok with all models
+
+✅ when using json as source, support turning $ref's into urls. at first, just do $ref for the top level, to keep it simple
+
+✅ HTML streamer
+
+✅ Ensure that it immediately streams the start of the html file, so we have an immediate response
+
+# Parsing (2025-02-11)
+
+- ✅ also parse `mainComment`
+- ✅ also parse `exportDefault:string[]` object properties
+- ✅ also parse `data` interface object key values!
+
+# Cache (2025-02-11)
+
+- ✅ Cache based on KEY `(immutable && !auth ? url : source-etag) + filters sorted`.
+- ✅ If cache-hit, use that as source, and apply desired streamer with plugins
+- ✅ Cache as ZIP on R2 by streaming the zip streamer to there if there's no cache-hit.
+- ✅ For private repos, allow prop `disableCache`
