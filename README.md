@@ -38,24 +38,3 @@ Instead of open sourcing uithub, why don't I open source this? The thing is a lo
 
 > [!WARNING]  
 > Could cause lot of competition. But maybe that's what I want.
-
-# Performance / Cost: Max $50
-
-To prevent abuse, vercel spend management caps my usage at $50 which is good enough. If this is hit, I can introduce ratelimits to the people hitting it the most.
-
-https://vercel.com/code-from-anywheres-projects/~/settings/billing
-
-https://vercel.com/code-from-anywheres-projects/zipobject/observability/route/%2Fapi%2Findex
-
-https://vercel.com/code-from-anywheres-projects/~/usage?projectId=prj_MA96ZLbSkYD6t72IzEpAc0eJiBcJ
-
-> [!TIP]
-> Let's keep an eye on these pages, if it starts hitting high, we may benefit from reducing allocated memory, for example, all the way down to a 128MB edge function. As a fallback, we can do 3GB for large repos, if that would make it faster.
-
-# Intended dependant open source projects
-
-- uithub: exploration of github
-- npmjz: exploration of npmjs/jsr and other package managers
-- ingestwiki: exploration of wikipedia
-- site2text: exploration of any website as markdown
-- gcombinator.news: the ycombinator site but with extra features
