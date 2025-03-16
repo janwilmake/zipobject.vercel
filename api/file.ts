@@ -5,7 +5,7 @@ export const GET = (request: Request) => {
   const path = chunks.join("/");
 
   return new Response(
-    "TODO: Raw file here by doing range request on zipobject: \n\n" +
+    "TODO: Get raw file here by stopping after its found. \n\n" +
       zipUrl +
       "\n\n" +
       path,

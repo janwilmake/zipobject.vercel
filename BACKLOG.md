@@ -1,3 +1,17 @@
+# Broadening filters with cache
+
+Figure out a way to also look for incrementally broadening filters to see if we have a broader filter cached
+
+Having this allows direct doc viewing from uithub, but much faster (replacing https://docs.uithub.com logic)
+
+To not decrease speed, add a waitUntil that schedules execution of the same URL but rather streams to cache it, and doesn't have a regular response. Create schedule.boncron.com for this.
+
+Place R2 in same place as the Vercel function: WEUR so it's fast with cache.
+
+# Parsing
+
+When parsing typescript Env or other interfaces, also parse non-references incase it's a primitive such as string,number,boolean.
+
 # Fetch built-in
 
 For `ZipStreamer`, fetch binary data where only a url is present (incase of fileobject input) - max 1000 subrequests and concurrency will be a major limitation here!
