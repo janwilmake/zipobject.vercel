@@ -11,7 +11,6 @@ export class FileProcessor extends Transform {
 
   constructor(
     private path: string,
-    private paths: string[],
     private rawUrlPrefix: string,
     private updatedAt: number,
   ) {
@@ -59,7 +58,7 @@ export class FileProcessor extends Transform {
           updatedAt,
         };
 
-    this.push({ path: this.path, paths: this.paths, entry });
+    this.push({ path: this.path, entry });
     callback();
   }
 }

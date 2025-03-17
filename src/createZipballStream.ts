@@ -3,9 +3,10 @@ import { PassThrough, Readable, Transform } from "node:stream";
 import * as YAML from "yaml";
 import { compile } from "./ignore.js";
 import { FileProcessor } from "./FileProcessor.js";
-import { BallOptions } from "./types.js";
+import { BallOptions, ContentFilterOptions, FileEntry } from "./types.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { pathFilter } from "./pathFilter.js";
+import { createSearchRegex } from "./createSearchRegex.js";
 
 export const createZipballStream = async (options: BallOptions) => {
   const {
@@ -17,6 +18,10 @@ export const createZipballStream = async (options: BallOptions) => {
     omitFirstSegment,
     ...filterOptions
   } = options;
+
+  const searchRegex = filterOptions.search
+    ? createSearchRegex(filterOptions)
+    : undefined;
 
   const readableStream = response.body;
   // Initialize token counter
@@ -79,15 +84,27 @@ export const createZipballStream = async (options: BallOptions) => {
     const updatedAt = new Date(entry.vars.lastModifiedDateTime).valueOf();
     // not diffrerent, seems invalid: const { lastModifiedDate, lastModifiedTime } = entry.vars;
     // Process the file
-    const processor = new FileProcessor(
-      filePath,
-      //TODO: put paths here from central index
-      [],
-      rawUrlPrefix,
-      updatedAt,
-    );
+    const processor = new FileProcessor(filePath, rawUrlPrefix, updatedAt);
 
-    processor.on("data", (data) => {
+    processor.on("data", (data: { entry: FileEntry }) => {
+      if (
+        filterOptions.maxFileSize &&
+        data.entry.size > filterOptions.maxFileSize
+      ) {
+        // Too big
+        entry.autodrain();
+        return;
+      }
+
+      if (searchRegex && data.entry.type === "content" && data.entry.content) {
+        if (!searchRegex.test(data.entry.content)) {
+          // no match to search
+          entry.autodrain();
+
+          return;
+        }
+      }
+
       // Check token limit before processing
       if (
         data.entry.type === "content" &&

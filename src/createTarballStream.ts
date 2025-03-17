@@ -4,7 +4,7 @@ import { createGunzip } from "zlib";
 import { compile } from "./ignore.js";
 import * as YAML from "yaml";
 import { FileProcessor } from "./FileProcessor.js";
-import { BallOptions } from "./types.js";
+import { BallOptions, FileEntry } from "./types.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { pathFilter } from "./pathFilter.js";
 
@@ -84,15 +84,9 @@ export const createTarballStream = async (options: BallOptions) => {
       }
 
       // Process the file
-      const processor = new FileProcessor(
-        filePath,
-        //TODO: put paths here from central index
-        [],
-        rawUrlPrefix,
-        Date.now(),
-      );
+      const processor = new FileProcessor(filePath, rawUrlPrefix, Date.now());
 
-      processor.on("data", (data) => {
+      processor.on("data", (data: { entry: FileEntry }) => {
         // Check token limit before processing
         if (
           data.entry.type === "content" &&
