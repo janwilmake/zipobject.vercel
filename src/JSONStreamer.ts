@@ -1,7 +1,5 @@
 import { Transform } from "node:stream";
 import { FileEntry, StreamHandlerOptions } from "./types.js";
-import * as YAML from "yaml";
-import TOML from "smol-toml";
 import { parseEntry } from "./parseEntry.js";
 
 type NestedObject<T = null> = {

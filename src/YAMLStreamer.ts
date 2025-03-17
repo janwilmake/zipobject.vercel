@@ -1,6 +1,6 @@
 import { Transform } from "node:stream";
 import { FileEntry, StreamHandlerOptions } from "./types.js";
-import YAML from "yaml";
+import YAML from "js-yaml";
 import { parseEntry } from "./parseEntry.js";
 
 type NestedObject<T = null> = {
@@ -108,7 +108,7 @@ export class YAMLStreamer extends Transform {
       }
 
       // Convert the entry to YAML and properly indent it
-      const entryYaml = YAML.stringify({ [chunk.path]: parsedEntry });
+      const entryYaml = YAML.dump({ [chunk.path]: parsedEntry });
       const indentedYaml = this.indentYAML(entryYaml, 1)
         .split("\n")
         .slice(1) // Remove the first line (key is handled differently)
@@ -125,13 +125,13 @@ export class YAMLStreamer extends Transform {
     // Add tree if not omitted
     if (!this.options.shouldOmitTree) {
       const treeObj = filePathToNestedObject(this.paths);
-      const treeYaml = YAML.stringify({ tree: treeObj });
+      const treeYaml = YAML.dump({ tree: treeObj });
       output += "\n" + treeYaml;
     }
 
     // Add size stats at the end
     const sizeStats = this.calculateSizeStats();
-    const statsYaml = YAML.stringify({ size: sizeStats });
+    const statsYaml = YAML.dump({ size: sizeStats });
     output += "\n" + statsYaml;
 
     this.push(output);

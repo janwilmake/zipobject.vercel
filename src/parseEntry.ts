@@ -1,4 +1,4 @@
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import TOML from "smol-toml";
 import { FileEntry } from "./types.js";
 import { trySwcParseFile } from "../swc/trySwcParseFile.js";
@@ -24,7 +24,7 @@ const parseContentToJson = (
 
   if (extension === "yaml" || extension === "yml") {
     try {
-      return YAML.parse(content);
+      return YAML.load(content);
     } catch {
       return null;
     }

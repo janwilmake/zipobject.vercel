@@ -1,6 +1,6 @@
 import { Parse } from "unzipper";
 import { PassThrough, Readable } from "node:stream";
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import * as crypto from "node:crypto";
 import { compile } from "./ignore.js";
 import { pathFilter } from "./pathFilter.js";
@@ -125,7 +125,7 @@ export const getZipballContents = async (context: {
   let yamlParse: any;
   try {
     if (yamlFilter) {
-      yamlParse = YAML.parse(yamlFilter);
+      yamlParse = YAML.load(yamlFilter);
     }
   } catch (e: any) {
     return {
