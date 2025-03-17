@@ -5,6 +5,9 @@
 - ✅ Make it run again and test it using some URL that works
 - ✅Test this with the content search regex for a tweet and path regex of `*.md`. Confirm that works
 - ✅ Deploy
+- ✅ make this work: http://localhost:3001/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https?://(x|twitter)\.com/([^/]+)/status/(\d+)&searchUseRegex=true&pathPatterns=_.md,_.ts
+- Allow admin apiKey via GET and test http://zipobject.vercel.app/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https?://(x|twitter)\.com/([^/]+)/status/(\d+)&searchUseRegex=true&pathPatterns=*.md,*.ts
+- http://zipobject.com/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https?://(x|twitter)\.com/([^/]+)/status/(\d+)&searchUseRegex=true&pathPatterns=*.md,*.ts does not. Figure out why!!!
 
 # Some bugs
 

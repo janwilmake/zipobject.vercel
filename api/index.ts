@@ -368,8 +368,10 @@ class UrlResponse extends Response {
 export const GET = async (request: Request, context: { waitUntil: any }) => {
   const url = new URL(request.url);
 
-  const apiKey = request.headers.get("Authorization")?.slice("Bearer ".length);
-  console.log("NODE_ENV", process.env.NODE_ENV);
+  const apiKey =
+    url.searchParams.get("apiKey") ||
+    request.headers.get("Authorization")?.slice("Bearer ".length);
+
   if (
     (!apiKey ||
       apiKey !== process.env.ADMIN_SECRET ||
