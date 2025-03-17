@@ -56,8 +56,8 @@ export type ContentFilterOptions = {
   maxFileSize?: number;
   /** A text/pattern to search for in the file content */
   search?: string;
-  /** Boolean to interpret search as a regular expression */
-  searchUseRegex?: boolean;
+  /** search with regular expression. must be base64 encoded and url encoded */
+  regex?: string;
   /** Boolean to enable/disable case sensitivity */
   searchCaseSensitive?: boolean;
   /** Boolean to match complete words only */

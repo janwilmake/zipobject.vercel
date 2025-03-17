@@ -207,7 +207,7 @@ type SortedFilters = {
   search: string | undefined;
   searchCaseSensitive: boolean;
   searchMatchWholeWord: boolean;
-  searchUseRegex: boolean;
+  regex: string | undefined;
 };
 
 const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
@@ -308,16 +308,15 @@ const getSortedFilters = (
     url.searchParams.get("excludePathPatterns") || undefined;
 
   const pathPatterns = url.searchParams.get("pathPatterns") || undefined;
-  const searchParam = url.searchParams.get("search");
-  const search = searchParam ? atob(searchParam) : undefined;
-  console.log(JSON.stringify({ requestUrl, searchParam, search }));
+  const search = url.searchParams.get("search") || undefined;
   const searchCaseSensitive =
     url.searchParams.get("searchCaseSensitive") === "true";
 
   const searchMatchWholeWord =
     url.searchParams.get("searchMatchWholeWord") === "true";
 
-  const searchUseRegex = url.searchParams.get("searchUseRegex") === "true";
+  const regexParam = url.searchParams.get("regex");
+  const regex = regexParam ? atob(regexParam) : undefined;
 
   return {
     excludeDir,
@@ -337,7 +336,7 @@ const getSortedFilters = (
     search,
     searchCaseSensitive,
     searchMatchWholeWord,
-    searchUseRegex,
+    regex,
   };
 };
 
@@ -485,7 +484,7 @@ ${text}`,
     search,
     searchCaseSensitive,
     searchMatchWholeWord,
-    searchUseRegex,
+    regex,
   } = sortedFilters;
 
   const shouldOmitFiles = url.searchParams.get("omitFiles") === "true";
@@ -598,7 +597,7 @@ ${text}`,
     search,
     searchCaseSensitive,
     searchMatchWholeWord,
-    searchUseRegex,
+    regex,
   };
 
   console.log({ type, options });

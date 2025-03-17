@@ -4,21 +4,15 @@ export const createSearchRegex = ({
   search,
   searchCaseSensitive,
   searchMatchWholeWord,
-  searchUseRegex,
+  regex,
 }: ContentFilterOptions): RegExp => {
   // Return empty regex if no search string is provided
-  if (!search) {
+  if (!search && !regex) {
     return new RegExp("");
   }
 
-  let pattern = search;
-
   // If not using regex, escape special regex characters
-  if (!searchUseRegex) {
-    // Escape special regex characters
-    //  pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
+  let pattern = search ? search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : regex!;
 
   // If matching whole word, add word boundary assertions
   if (searchMatchWholeWord) {
