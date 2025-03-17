@@ -170,5 +170,5 @@ export const createZipballStream = async (options: BallOptions) => {
     cacheStream.destroy(err);
   });
 
-  return { outputStream, cacheStream };
+  return { outputStream, cacheStream, searchRegex };
 };

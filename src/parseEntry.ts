@@ -147,10 +147,11 @@ const parseCode = (
     exportDefault,
   };
 };
-export const parseJsonFileEntry = (
+export const parseEntry = (
   path: string,
   entry: FileEntry,
   plugins: string[],
+  searchRegex: RegExp | undefined,
 ): FileEntry => {
   if (entry.type === "content" && typeof entry.content === "string") {
     const extension = path.split(".").pop()?.toLowerCase() || "";
@@ -176,9 +177,16 @@ export const parseJsonFileEntry = (
       parse: plugins.includes("parse"),
       data: plugins.includes("data"),
     });
+
+    const matches = searchRegex
+      ? Array.from(entry.content.matchAll(searchRegex))
+      : undefined;
+    //(entry.content)
+
     return {
       ...entry,
       ...code,
+      matches,
       mainComment: plugins.includes("imports") ? mainComment : undefined,
       json: parseContentToJson(extension, entry.content),
     };

@@ -1,6 +1,6 @@
 import { Transform } from "node:stream";
 import { FileEntry, StreamHandlerOptions } from "./types.js";
-import { parseJsonFileEntry } from "./parseJsonFileEntry.js";
+import { parseEntry } from "./parseEntry.js";
 
 type NestedObject<T = null> = {
   [key: string]: NestedObject<T> | T;
@@ -79,10 +79,11 @@ export class JSONSequenceStreamer extends Transform {
   ) {
     try {
       // Parse the content if applicable
-      const parsedEntry = parseJsonFileEntry(
+      const parsedEntry = parseEntry(
         chunk.path,
         chunk.entry,
         this.options.plugins,
+        this.options.searchRegex,
       );
 
       // Store the file entry and update counts

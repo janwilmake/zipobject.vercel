@@ -6,6 +6,7 @@ export interface StreamHandlerOptions {
   shouldOmitTree: boolean;
   disableGenignore: boolean;
   plugins: string[];
+  searchRegex: RegExp | undefined;
 }
 
 export interface FileEntry {
@@ -30,6 +31,7 @@ export interface FileEntry {
     imports?: any[];
     statements?: any[];
   };
+  matches?: RegExpExecArray[];
 }
 
 export type BallOptions = {

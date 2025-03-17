@@ -1,7 +1,7 @@
 import { Transform } from "node:stream";
 import { FileEntry, StreamHandlerOptions } from "./types.js";
 import * as YAML from "yaml";
-import { parseJsonFileEntry } from "./parseJsonFileEntry.js";
+import { parseEntry } from "./parseEntry.js";
 
 type NestedObject<T = null> = {
   [key: string]: NestedObject<T> | T;
@@ -83,10 +83,11 @@ export class YAMLStreamer extends Transform {
     callback: Function,
   ) {
     // Parse the content if applicable
-    const parsedEntry = parseJsonFileEntry(
+    const parsedEntry = parseEntry(
       chunk.path,
       chunk.entry,
       this.options.plugins,
+      this.options.searchRegex,
     );
 
     // Store the path and update counts

@@ -1,6 +1,5 @@
 import { Transform } from "node:stream";
 import { FileEntry, StreamHandlerOptions } from "./types.js";
-import { parseJsonFileEntry } from "./parseJsonFileEntry.js";
 
 const CHARACTERS_PER_TOKEN = 5;
 

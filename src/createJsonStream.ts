@@ -3,6 +3,7 @@ import * as YAML from "yaml";
 import { pathFilter } from "./pathFilter.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { BallOptions, FileEntry } from "./types.js";
+import { createSearchRegex } from "./createSearchRegex.js";
 
 interface JsonFileEntry {
   type: "content" | "binary";
@@ -76,6 +77,9 @@ export const createJsonStream = async (options: BallOptions) => {
   // Initialize token counter
   const tokenCounter = new TokenCounter(maxTokens);
 
+  const searchRegex = filterOptions.search
+    ? createSearchRegex(filterOptions)
+    : undefined;
   // Parse YAML filter if provided
   let yamlParse: any;
   if (yamlString) {
@@ -127,6 +131,19 @@ export const createJsonStream = async (options: BallOptions) => {
         continue;
       }
 
+      if (searchRegex) {
+        if (entry.type === "binary") {
+          // binary never matches
+          continue;
+        }
+        if (entry.type === "content" && entry.content) {
+          if (!searchRegex.test(entry.content)) {
+            // no match to search
+            continue;
+          }
+        }
+      }
+
       // Check token limit before processing
       if (
         entry.type === "content" &&
@@ -166,5 +183,5 @@ export const createJsonStream = async (options: BallOptions) => {
     cacheStream.destroy(error as Error);
   }
 
-  return { outputStream, cacheStream };
+  return { outputStream, cacheStream, searchRegex };
 };

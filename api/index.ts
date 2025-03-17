@@ -592,7 +592,7 @@ ${text}`,
 
   try {
     // Create and set up Node.js streams
-    const { cacheStream, outputStream } =
+    const { cacheStream, outputStream, searchRegex } =
       type === "tarball"
         ? await createTarballStream(options)
         : type === "zipball"
@@ -623,6 +623,7 @@ ${text}`,
             shouldOmitTree,
             disableGenignore,
             plugins,
+            searchRegex,
           })
         : responseContentType === "text/yaml"
         ? new YAMLStreamer({
@@ -630,6 +631,7 @@ ${text}`,
             shouldOmitTree,
             disableGenignore,
             plugins,
+            searchRegex,
           })
         : responseContentType === "text/markdown"
         ? new MarkdownStreamer({
@@ -637,6 +639,7 @@ ${text}`,
             shouldOmitTree,
             disableGenignore,
             plugins,
+            searchRegex,
           })
         : responseContentType === "text/html"
         ? new HTMLStreamer({
@@ -647,12 +650,14 @@ ${text}`,
             shouldOmitTree,
             disableGenignore,
             plugins,
+            searchRegex,
           })
         : new JSONStreamer({
             shouldOmitFiles,
             shouldOmitTree,
             disableGenignore,
             plugins,
+            searchRegex,
           });
 
     // Set up the pipeline in Node.js streams

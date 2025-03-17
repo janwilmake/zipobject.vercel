@@ -182,5 +182,5 @@ export const createTarballStream = async (options: BallOptions) => {
     outputStream.destroy(err);
   });
 
-  return { outputStream, cacheStream };
+  return { outputStream, cacheStream, searchRegex };
 };
