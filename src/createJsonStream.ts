@@ -1,6 +1,6 @@
 import { PassThrough } from "node:stream";
 import * as YAML from "yaml";
-import { shouldIncludeFile } from "./shouldIncludeFile.js";
+import { pathFilter } from "./pathFilter.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { BallOptions, FileEntry } from "./types.js";
 
@@ -59,7 +59,7 @@ export const createJsonStream = async (options: BallOptions) => {
   const {
     response,
     disableGenignore,
-    yamlFilter,
+    yamlString,
     maxTokens,
     rawUrlPrefix,
     omitFirstSegment,
@@ -70,6 +70,7 @@ export const createJsonStream = async (options: BallOptions) => {
     excludeDir,
     allowedPaths,
     maxFileSize,
+    ...filterOptions
   } = options;
 
   // Initialize token counter
@@ -77,9 +78,9 @@ export const createJsonStream = async (options: BallOptions) => {
 
   // Parse YAML filter if provided
   let yamlParse: any;
-  if (yamlFilter) {
+  if (yamlString) {
     try {
-      yamlParse = YAML.parse(yamlFilter);
+      yamlParse = YAML.parse(yamlString);
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }
@@ -106,7 +107,7 @@ export const createJsonStream = async (options: BallOptions) => {
 
       // Check if file should be included based on filters
       if (
-        !shouldIncludeFile({
+        !pathFilter({
           matchFilenames,
           filePath,
           yamlParse,
@@ -115,6 +116,7 @@ export const createJsonStream = async (options: BallOptions) => {
           includeDir,
           excludeDir,
           allowedPaths,
+          ...filterOptions,
         })
       ) {
         continue;

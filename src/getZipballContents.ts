@@ -3,7 +3,7 @@ import { PassThrough, Readable } from "node:stream";
 import * as YAML from "yaml";
 import * as crypto from "node:crypto";
 import { compile } from "./ignore.js";
-import { shouldIncludeFile } from "./shouldIncludeFile.js";
+import { pathFilter } from "./pathFilter.js";
 
 type HashedEntry = {
   content: string | undefined;
@@ -161,6 +161,7 @@ export const getZipballContents = async (context: {
   const nodeStream = new PassThrough();
   Readable.fromWeb(response.body as any).pipe(nodeStream);
 
+  // TODO: add default genignore
   let genignoreString: string | null = null;
 
   // Stream the response and unzip it
@@ -178,7 +179,7 @@ export const getZipballContents = async (context: {
     }
 
     if (
-      !shouldIncludeFile({
+      !pathFilter({
         matchFilenames,
         filePath,
         yamlParse,

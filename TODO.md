@@ -1,10 +1,16 @@
-# MVP
+# Ship functional zipobject with regex search
 
 - Add new functionality for includeFiles, excludeFiles, search, matchCase, useRegex
 - exclude-dir bug: https://x.com/jhogervorst/status/1900128634926514640
 - Bug with spaces: https://x.com/janwilmake/status/1898753253988253946
-- Binary urls for private repos: These should not use the raw.githubusercontent, but rather `zipboject.com/file`. Either that or ensure its clear how to access with raw.githubusercontent. can still be done with api key i guess and maybe it's just best.
 - Ensure the thing doesn't crash when files are empty (or other reasons)
+- Deploy
+
+After this, `forgithub.threads`.
+
+# MVP
+
+- Binary urls for private repos: These should not use the raw.githubusercontent, but rather `zipboject.com/file`. Either that or ensure its clear how to access with raw.githubusercontent. can still be done with api key i guess and maybe it's just best.
 - Ensure zipobject doesn't cache private repos! This may be a challenge. How to know this!? Look at zip location
 - Public repos is as cheap as possible (see cost vercel), private repos cost is 10x (profit is here). We can do this if we add a `x-is-private-resource` response header.
 

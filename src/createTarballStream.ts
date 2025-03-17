@@ -2,18 +2,18 @@ import { extract } from "tar-stream";
 import { PassThrough, Readable, Transform } from "node:stream";
 import { createGunzip } from "zlib";
 import { compile } from "./ignore.js";
-import { shouldIncludeFile } from "./shouldIncludeFile.js";
 import * as YAML from "yaml";
 import { FileProcessor } from "./FileProcessor.js";
 import { BallOptions } from "./types.js";
 import { TokenCounter } from "./TokenCounter.js";
+import { pathFilter } from "./pathFilter.js";
 
 // Updated createTarballStream.ts
 export const createTarballStream = async (options: BallOptions) => {
   const {
     response,
     disableGenignore,
-    yamlFilter,
+    yamlString,
     maxTokens,
     rawUrlPrefix,
     omitFirstSegment,
@@ -25,9 +25,9 @@ export const createTarballStream = async (options: BallOptions) => {
 
   // Parse YAML filter if provided
   let yamlParse: any;
-  if (yamlFilter) {
+  if (yamlString) {
     try {
-      yamlParse = YAML.parse(yamlFilter);
+      yamlParse = YAML.parse(yamlString);
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }
@@ -72,7 +72,7 @@ export const createTarballStream = async (options: BallOptions) => {
 
       // Check if file should be included
       if (
-        !shouldIncludeFile({
+        !pathFilter({
           ...filterOptions,
           filePath,
           yamlParse,

@@ -3,8 +3,8 @@ import { PassThrough, Readable } from "node:stream";
 import { createHash } from "node:crypto";
 import { createGunzip } from "zlib";
 import { compile } from "./ignore.js";
-import { shouldIncludeFile } from "./shouldIncludeFile.js";
 import * as YAML from "yaml";
+import { pathFilter } from "./pathFilter.js";
 
 type HashedEntry = {
   content?: string;
@@ -137,15 +137,10 @@ export const getTarballContents = async (context: {
     // Check if file should be included based on filters
     if (
       context &&
-      !shouldIncludeFile({
-        matchFilenames: context.matchFilenames,
+      !pathFilter({
         filePath,
         yamlParse,
-        includeExt: context.includeExt,
-        excludeExt: context.excludeExt,
-        includeDir: context.includeDir,
-        excludeDir: context.excludeDir,
-        allowedPaths: context.allowedPaths,
+        ...context,
       })
     ) {
       stream.resume();

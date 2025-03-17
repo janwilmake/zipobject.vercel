@@ -192,7 +192,7 @@ function detectFileType(contentType: string | null, url: string): FileType {
 type SortedFilters = {
   maxTokens: number | undefined;
   matchFilenames: string[] | undefined;
-  yamlFilter: string | undefined;
+  yamlString: string | undefined;
   maxFileSize: number | undefined;
   disableGenignore: boolean;
   excludeDir: string[] | undefined;
@@ -200,6 +200,14 @@ type SortedFilters = {
   includeDir: string[] | undefined;
   includeExt: string[] | undefined;
   allowedPaths: string[] | undefined;
+  // New parameters
+  enableFuzzyMatching: boolean;
+  excludePathPatterns: string | undefined;
+  pathPatterns: string | undefined;
+  search: string | undefined;
+  searchCaseSensitive: boolean;
+  searchMatchWholeWord: boolean;
+  searchUseRegex: boolean;
 };
 
 const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
@@ -231,6 +239,7 @@ const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
   return filterHashes;
 };
 /** Gets the filters that the cache relies on */
+/** Gets the filters that the cache relies on */
 const getSortedFilters = (
   url: URL,
   path: string | undefined,
@@ -244,34 +253,29 @@ const getSortedFilters = (
     ? [path]
     : undefined;
 
-  const includeExt = url.searchParams
-    .get("ext")
-    ?.split(",")
-    .map((x) => x.toLowerCase().trim())
-    .sort((a, b) => (b < a ? -1 : 1));
-  const includeDir = url.searchParams
-    .get("dir")
-    ?.split(",")
-    .map((x) => x.toLowerCase().trim())
-    .sort((a, b) => (b < a ? -1 : 1));
-  const excludeExt = url.searchParams
-    .get("exclude-ext")
-    ?.split(",")
-    .map((x) => x.toLowerCase().trim())
-    .sort((a, b) => (b < a ? -1 : 1));
-  const excludeDir = url.searchParams
-    .get("exclude-dir")
-    ?.split(",")
-    .map((x) => x.toLowerCase().trim())
-    .sort((a, b) => (b < a ? -1 : 1));
-
   const disableGenignore =
     !url.searchParams.get("disableGenignore") ||
     url.searchParams.get("disableGenignore") !== "false";
   const maxFileSize =
     parseInt(url.searchParams.get("maxFileSize") || "0", 10) || undefined;
   const maxTokensQuery = url.searchParams.get("maxTokens");
-  const yamlFilter = url.searchParams.get("yamlFilter") || undefined;
+  const excludeDir = url.searchParams
+    .get("exclude-dir")
+    ?.split(",")
+    .map((x) => x.trim());
+  const excludeExt = url.searchParams
+    .get("exclude-ext")
+    ?.split(",")
+    .map((x) => x.trim());
+  const includeDir = url.searchParams
+    .get("dir")
+    ?.split(",")
+    .map((x) => x.trim());
+  const includeExt = url.searchParams
+    .get("ext")
+    ?.split(",")
+    .map((x) => x.trim());
+  const yamlString = url.searchParams.get("yamlString") || undefined;
   // match these filenames, case insensitive
   const matchFilenames = url.searchParams
     .get("matchFilenames")
@@ -284,17 +288,45 @@ const getSortedFilters = (
     maxTokensQuery && !isNaN(Number(maxTokensQuery))
       ? Number(maxTokensQuery)
       : undefined;
+
+  // Add the new parameters
+  const enableFuzzyMatching =
+    url.searchParams.get("enableFuzzyMatching") === "true";
+
+  const excludePathPatterns =
+    url.searchParams.get("excludePathPatterns") || undefined;
+
+  const pathPatterns = url.searchParams.get("pathPatterns") || undefined;
+
+  const search = url.searchParams.get("search") || undefined;
+
+  const searchCaseSensitive =
+    url.searchParams.get("searchCaseSensitive") === "true";
+
+  const searchMatchWholeWord =
+    url.searchParams.get("searchMatchWholeWord") === "true";
+
+  const searchUseRegex = url.searchParams.get("searchUseRegex") === "true";
+
   return {
-    maxTokens,
-    matchFilenames,
-    yamlFilter,
-    maxFileSize,
-    disableGenignore,
     excludeDir,
     excludeExt,
     includeDir,
     includeExt,
+    maxTokens,
+    matchFilenames,
+    yamlString,
+    maxFileSize,
+    disableGenignore,
     allowedPaths,
+    // Add the new parameters to the returned object
+    enableFuzzyMatching,
+    excludePathPatterns,
+    pathPatterns,
+    search,
+    searchCaseSensitive,
+    searchMatchWholeWord,
+    searchUseRegex,
   };
 };
 
@@ -432,7 +464,14 @@ ${text}`,
     matchFilenames,
     maxFileSize,
     maxTokens,
-    yamlFilter,
+    yamlString,
+    enableFuzzyMatching,
+    excludePathPatterns,
+    pathPatterns,
+    search,
+    searchCaseSensitive,
+    searchMatchWholeWord,
+    searchUseRegex,
   } = sortedFilters;
 
   const shouldOmitFiles = url.searchParams.get("omitFiles") === "true";
@@ -537,8 +576,15 @@ ${text}`,
     includeExt,
     matchFilenames,
     maxFileSize,
-    shouldOmitFiles,
-    yamlFilter,
+    omitFiles: shouldOmitFiles,
+    yamlString,
+    enableFuzzyMatching,
+    excludePathPatterns,
+    pathPatterns,
+    search,
+    searchCaseSensitive,
+    searchMatchWholeWord,
+    searchUseRegex,
   };
 
   // console.log({ response, contentType, options, type });
