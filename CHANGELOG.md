@@ -136,3 +136,17 @@ import { trySwcParseFile } from "../swc/trySwcParseFile";
 - ✅ If cache-hit, use that as source, and apply desired streamer with plugins
 - ✅ Cache as ZIP on R2 by streaming the zip streamer to there if there's no cache-hit.
 - ✅ For private repos, allow prop `disableCache`
+
+# Ship functional zipobject with regex search (2025-03-17)
+
+- ✅ Add new functionality for path search
+- ✅ Implement search with options into tarballStream and zipballStream.
+- ✅ Make it run again and test it using some URL that works
+- ✅Test this with the content search regex for a tweet and path regex of `*.md`. Confirm that works
+- ✅ Deploy
+- ✅ make this work: http://localhost:3001/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https?://(x|twitter)\.com/([^/]+)/status/(\d+)&searchUseRegex=true&pathPatterns=_.md,_.ts
+- ✅ Allow admin apiKey via GET and test http://zipobject.vercel.app. Fix crash there.
+- ✅ If it all works on there, make it work on zipobject.com too.
+- ✅ URLEncoded regex does not work for some reason. Figure out the difference between http://localhost:3001/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https?://(x|twitter)\.com/([^/]+)/status/(\d+)&searchUseRegex=true and http://localhost:3001/github.com/janwilmake/cloudflare-sponsorware?accept=application/json&search=https%3F%3A%2F%2F(x%7Ctwitter).com%2F(%5B%5E%2F%5D%2B)%2Fstatus%2F(d%2B)&searchUseRegex=true
+- ✅ If it all works on localhost, make it work on https://zipobject.vercel.app and with that on https://zipobject.com
+- ✅ After this, `forgithub.threads`: use OpenAPI to generate forgithub.threads based on https://zipobject.vercel.app, ensuring it only returns the actual tweet urls as typed array.
