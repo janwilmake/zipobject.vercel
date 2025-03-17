@@ -3,7 +3,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.733.0",
     "@aws-sdk/lib-storage": "^3.733.0",
-    "@swc/core": "^1.7.26",
+    "@swc/core": "^1.11.10",
     "js-yaml": "^4.1.0",
     "jszip": "^3.10.1",
     "micromatch": "^4.0.8",

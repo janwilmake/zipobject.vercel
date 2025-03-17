@@ -590,7 +590,7 @@ ${text}`,
     searchUseRegex,
   };
 
-  // console.log({ response, contentType, options, type });
+  console.log({ type, options });
 
   try {
     // Create and set up Node.js streams

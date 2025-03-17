@@ -108,7 +108,7 @@ export const pathFilter = (
       return matcher(filePath);
     });
 
-    // console.log({ filePath, patterns, isMatch });
+    console.log({ filePath, patterns, isMatch });
 
     if (!isMatch) {
       return false;
