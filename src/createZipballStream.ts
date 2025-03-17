@@ -19,9 +19,10 @@ export const createZipballStream = async (options: BallOptions) => {
     ...filterOptions
   } = options;
 
-  const searchRegex = filterOptions.search
-    ? createSearchRegex(filterOptions)
-    : undefined;
+  const searchRegex =
+    filterOptions.search || filterOptions.regex
+      ? createSearchRegex(filterOptions)
+      : undefined;
 
   const readableStream = response.body;
   // Initialize token counter
