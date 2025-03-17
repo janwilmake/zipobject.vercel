@@ -7,6 +7,7 @@ import { FileProcessor } from "./FileProcessor.js";
 import { BallOptions, FileEntry } from "./types.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { pathFilter } from "./pathFilter.js";
+import { createSearchRegex } from "./createSearchRegex.js";
 
 // Updated createTarballStream.ts
 export const createTarballStream = async (options: BallOptions) => {
@@ -19,6 +20,10 @@ export const createTarballStream = async (options: BallOptions) => {
     omitFirstSegment,
     ...filterOptions
   } = options;
+
+  const searchRegex = filterOptions.search
+    ? createSearchRegex(filterOptions)
+    : undefined;
 
   // Initialize token counter
   const tokenCounter = new TokenCounter(maxTokens);
@@ -87,6 +92,30 @@ export const createTarballStream = async (options: BallOptions) => {
       const processor = new FileProcessor(filePath, rawUrlPrefix, Date.now());
 
       processor.on("data", (data: { entry: FileEntry }) => {
+        if (
+          filterOptions.maxFileSize &&
+          data.entry.size > filterOptions.maxFileSize
+        ) {
+          // Too big
+          stream.resume();
+          next();
+          return;
+        }
+
+        if (
+          searchRegex &&
+          data.entry.type === "content" &&
+          data.entry.content
+        ) {
+          if (!searchRegex.test(data.entry.content)) {
+            // no match to search
+            stream.resume();
+            next();
+
+            return;
+          }
+        }
+
         // Check token limit before processing
         if (
           data.entry.type === "content" &&
