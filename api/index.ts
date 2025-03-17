@@ -238,12 +238,23 @@ const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
   );
   return filterHashes;
 };
+
+function getSearchParam(url: string, paramName: string): string | null {
+  const regex = new RegExp(`[?&]${paramName}=([^&]*)`, "i");
+  const match = url.match(regex);
+  if (match && match[1]) {
+    return decodeURIComponent(match[1]);
+  }
+  return null;
+}
+
 /** Gets the filters that the cache relies on */
 /** Gets the filters that the cache relies on */
 const getSortedFilters = (
-  url: URL,
+  requestUrl: string,
   path: string | undefined,
 ): SortedFilters => {
+  const url = new URL(requestUrl);
   const allowedPathsQuery = url.searchParams
     .getAll("allowedPaths")
     .sort((a, b) => (b < a ? -1 : 1));
@@ -297,9 +308,9 @@ const getSortedFilters = (
     url.searchParams.get("excludePathPatterns") || undefined;
 
   const pathPatterns = url.searchParams.get("pathPatterns") || undefined;
-
-  const search = url.searchParams.get("search") || undefined;
-
+  const searchParam = url.searchParams.get("search");
+  const search = searchParam ? atob(searchParam) : undefined;
+  console.log(JSON.stringify({ requestUrl, searchParam, search }));
   const searchCaseSensitive =
     url.searchParams.get("searchCaseSensitive") === "true";
 
@@ -455,7 +466,7 @@ ${text}`,
     }
   }
 
-  const sortedFilters = getSortedFilters(url, path);
+  const sortedFilters = getSortedFilters(request.url, path);
 
   const {
     allowedPaths,

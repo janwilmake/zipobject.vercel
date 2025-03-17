@@ -16,6 +16,7 @@ export const createSearchRegex = ({
   // If not using regex, escape special regex characters
   if (!searchUseRegex) {
     // Escape special regex characters
+    //  pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
