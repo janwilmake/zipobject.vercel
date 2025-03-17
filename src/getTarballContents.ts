@@ -3,7 +3,7 @@ import { PassThrough, Readable } from "node:stream";
 import { createHash } from "node:crypto";
 import { createGunzip } from "zlib";
 import { compile } from "./ignore.js";
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import { pathFilter } from "./pathFilter.js";
 
 type HashedEntry = {
@@ -83,7 +83,7 @@ export const getTarballContents = async (context: {
   let yamlParse: any;
   try {
     if (context?.yamlFilter) {
-      yamlParse = YAML.parse(context.yamlFilter);
+      yamlParse = YAML.load(context.yamlFilter);
     }
   } catch (e: any) {
     return {

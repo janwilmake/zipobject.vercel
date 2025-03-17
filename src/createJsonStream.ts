@@ -1,5 +1,5 @@
 import { PassThrough } from "node:stream";
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import { pathFilter } from "./pathFilter.js";
 import { TokenCounter } from "./TokenCounter.js";
 import { BallOptions, FileEntry } from "./types.js";
@@ -84,7 +84,7 @@ export const createJsonStream = async (options: BallOptions) => {
   let yamlParse: any;
   if (yamlString) {
     try {
-      yamlParse = YAML.parse(yamlString);
+      yamlParse = YAML.load(yamlString);
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }

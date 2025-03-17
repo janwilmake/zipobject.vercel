@@ -1,6 +1,6 @@
 import { Parse } from "unzipper";
 import { PassThrough, Readable, Transform } from "node:stream";
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import { compile } from "./ignore.js";
 import { FileProcessor } from "./FileProcessor.js";
 import { BallOptions, ContentFilterOptions, FileEntry } from "./types.js";
@@ -31,7 +31,7 @@ export const createZipballStream = async (options: BallOptions) => {
   let yamlParse: any;
   if (yamlString) {
     try {
-      yamlParse = YAML.parse(yamlString);
+      yamlParse = YAML.load(yamlString);
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }

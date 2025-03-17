@@ -2,7 +2,7 @@ import { extract } from "tar-stream";
 import { PassThrough, Readable, Transform } from "node:stream";
 import { createGunzip } from "zlib";
 import { compile } from "./ignore.js";
-import * as YAML from "yaml";
+import * as YAML from "js-yaml";
 import { FileProcessor } from "./FileProcessor.js";
 import { BallOptions, FileEntry } from "./types.js";
 import { TokenCounter } from "./TokenCounter.js";
@@ -32,7 +32,7 @@ export const createTarballStream = async (options: BallOptions) => {
   let yamlParse: any;
   if (yamlString) {
     try {
-      yamlParse = YAML.parse(yamlString);
+      yamlParse = YAML.load(yamlString);
     } catch (e: any) {
       throw new Error(`Invalid YAML filter: ${e.message}`);
     }
