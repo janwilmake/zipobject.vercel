@@ -178,12 +178,13 @@ export const parseEntry = (
       data: plugins.includes("data"),
     });
 
+    if (searchRegex) {
+      //reset lastIndex since we already done this
+      searchRegex.lastIndex = 0;
+    }
     const matches = searchRegex
-      ? searchRegex.global
-        ? Array.from(entry.content.matchAll(searchRegex))
-        : [entry.content.match(searchRegex)].filter((x) => !!x)
+      ? Array.from(entry.content.matchAll(searchRegex))
       : undefined;
-    //(entry.content)
 
     return {
       ...entry,

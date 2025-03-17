@@ -25,5 +25,5 @@ export const createSearchRegex = ({
   }
 
   // Create and return the RegExp object with appropriate flags
-  return new RegExp(pattern, searchCaseSensitive ? "" : "i");
+  return new RegExp(pattern, `${searchCaseSensitive ? "" : "i"}g`);
 };
