@@ -369,11 +369,12 @@ export const GET = async (request: Request, context: { waitUntil: any }) => {
   const url = new URL(request.url);
 
   const apiKey = request.headers.get("Authorization")?.slice("Bearer ".length);
-
+  console.log("NODE_ENV", process.env.NODE_ENV);
   if (
-    !apiKey ||
-    apiKey !== process.env.ADMIN_SECRET ||
-    !process.env.ADMIN_SECRET
+    (!apiKey ||
+      apiKey !== process.env.ADMIN_SECRET ||
+      !process.env.ADMIN_SECRET) &&
+    process.env.NODE_ENV !== "development"
   ) {
     return new Response(
       !process.env.ADMIN_SECRET

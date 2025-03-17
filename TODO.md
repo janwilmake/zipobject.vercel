@@ -1,10 +1,16 @@
 # Ship functional zipobject with regex search
 
-- Add new functionality for includeFiles, excludeFiles, search, matchCase, useRegex
+- ✅ Add new functionality for path search
+- ✅ Implement search with options into tarballStream and zipballStream.
+- ✅ Make it run again and test it using some URL that works
+- ✅Test this with the content search regex for a tweet and path regex of `*.md`. Confirm that works
+- ✅ Deploy
+
+# Some bugs
+
 - exclude-dir bug: https://x.com/jhogervorst/status/1900128634926514640
 - Bug with spaces: https://x.com/janwilmake/status/1898753253988253946
 - Ensure the thing doesn't crash when files are empty (or other reasons)
-- Deploy
 
 After this, `forgithub.threads`.
 

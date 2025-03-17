@@ -96,12 +96,20 @@ export const createZipballStream = async (options: BallOptions) => {
         return;
       }
 
-      if (searchRegex && data.entry.type === "content" && data.entry.content) {
-        if (!searchRegex.test(data.entry.content)) {
-          // no match to search
+      if (searchRegex) {
+        if (data.entry.type === "binary") {
+          // binary never matches
           entry.autodrain();
-
           return;
+        }
+
+        if (data.entry.type === "content" && data.entry.content) {
+          if (!searchRegex.test(data.entry.content)) {
+            // no match to search
+            entry.autodrain();
+
+            return;
+          }
         }
       }
 

@@ -102,17 +102,21 @@ export const createTarballStream = async (options: BallOptions) => {
           return;
         }
 
-        if (
-          searchRegex &&
-          data.entry.type === "content" &&
-          data.entry.content
-        ) {
-          if (!searchRegex.test(data.entry.content)) {
-            // no match to search
+        if (searchRegex) {
+          if (data.entry.type === "binary") {
+            // binary never matches
             stream.resume();
             next();
-
             return;
+          }
+          if (data.entry.type === "content" && data.entry.content) {
+            if (!searchRegex.test(data.entry.content)) {
+              // no match to search
+              stream.resume();
+              next();
+
+              return;
+            }
           }
         }
 
