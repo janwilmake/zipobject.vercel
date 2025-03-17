@@ -179,7 +179,9 @@ export const parseEntry = (
     });
 
     const matches = searchRegex
-      ? Array.from(entry.content.matchAll(searchRegex))
+      ? searchRegex.global
+        ? Array.from(entry.content.matchAll(searchRegex))
+        : [entry.content.match(searchRegex)].filter((x) => !!x)
       : undefined;
     //(entry.content)
 

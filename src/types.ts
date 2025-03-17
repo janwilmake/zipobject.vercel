@@ -31,7 +31,7 @@ export interface FileEntry {
     imports?: any[];
     statements?: any[];
   };
-  matches?: RegExpExecArray[];
+  matches?: string[][];
 }
 
 export type BallOptions = {
