@@ -23,3 +23,7 @@ Gitlab zip archives requests don't get accepted from vercel - see `gitlab.test.t
 # Moving to cloudflare
 
 It's not worth replacing swc with acorn and running zipjs in a Durable object even though this could allow me to migrate to cloudflare from vercel. Rather than that, just use free vercel for now and start paying if it gets too much. The business should evolve if it can ask questions!
+
+# Regexes in a GET request
+
+It's hard to put them in a GET request as encoding/decoding fuck up the backslash (`\`) so to ensure it works and keeps working I figured it's better to use a different encoding/decoding method. With base64 (atob/btoa) it works fine!
