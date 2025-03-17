@@ -99,15 +99,16 @@ export const pathFilter = (
     }
 
     const patterns = normalizePatterns(pathPatterns);
-
     const isMatch = patterns.some((pattern) => {
       const matcher = getCachedMatcher(pattern, patternMatchersCache, {
-        dot: true, // Match dotfiles
+        dot: true,
         nocase: false,
-        matchBase: false,
+        basename: true,
       });
       return matcher(filePath);
     });
+
+    // console.log({ filePath, patterns, isMatch });
 
     if (!isMatch) {
       return false;
