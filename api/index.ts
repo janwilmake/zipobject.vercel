@@ -199,7 +199,7 @@ type SortedFilters = {
   excludeExt: string[] | undefined;
   includeDir: string[] | undefined;
   includeExt: string[] | undefined;
-  allowedPath: string[] | undefined;
+  basePath: string[] | undefined;
   // New parameters
   enableFuzzyMatching: boolean;
   excludePathPatterns: string | undefined;
@@ -214,7 +214,7 @@ const getBroadeningFilterHashes = async (sortedFilterObject: SortedFilters) => {
   // TODO: make it incrementally less specific / more broad
   const sortedFilterObjects = [sortedFilterObject];
   // less specific for each path is more broad
-  //  allowedPath,
+  //  basePath,
   // disabled is more broad
   // disableGenignore,
   // less is more broad
@@ -255,11 +255,11 @@ const getSortedFilters = (
   path: string | undefined,
 ): SortedFilters => {
   const url = new URL(requestUrl);
-  const allowedPathQuery = url.searchParams
-    .getAll("allowedPath")
+  const basePathQuery = url.searchParams
+    .getAll("basePath")
     .sort((a, b) => (b < a ? -1 : 1));
-  const allowedPath = allowedPathQuery.length
-    ? allowedPathQuery
+  const basePath = basePathQuery.length
+    ? basePathQuery
     : path !== undefined && path !== ""
     ? [path]
     : undefined;
@@ -328,7 +328,7 @@ const getSortedFilters = (
     yamlString,
     maxFileSize,
     disableGenignore,
-    allowedPath,
+    basePath,
     // Add the new parameters to the returned object
     enableFuzzyMatching,
     excludePathPatterns,
@@ -468,7 +468,7 @@ ${text}`,
   const sortedFilters = getSortedFilters(request.url, path);
 
   const {
-    allowedPath,
+    basePath,
     disableGenignore,
     excludeDir,
     excludeExt,
@@ -579,7 +579,7 @@ ${text}`,
     response,
     omitFirstSegment,
     rawUrlPrefix: getRawUrlPrefix(response.url),
-    allowedPath,
+    basePath,
     maxTokens,
     immutable,
     disableGenignore,

@@ -66,7 +66,7 @@ export type ContentFilterOptions = {
 /** Filters on file path and file content/metadata */
 export type PathFilterOptions = {
   /** Base path(s) allowed */
-  allowedPath?: string[];
+  basePath?: string[];
   /** `.genignore` works like `.gitignore` and the repo owner can place this file in the repo to automatically filter out these files. To disable this and also to disable the default genignore, you can set this to true */
   disableGenignore?: boolean;
   /** glob pattern for files to include. If provided, will filter path on this. */

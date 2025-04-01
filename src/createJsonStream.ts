@@ -69,7 +69,7 @@ export const createJsonStream = async (options: BallOptions) => {
     excludeExt,
     includeDir,
     excludeDir,
-    allowedPath,
+    basePath,
     maxFileSize,
     ...filterOptions
   } = options;
@@ -119,7 +119,7 @@ export const createJsonStream = async (options: BallOptions) => {
           excludeExt,
           includeDir,
           excludeDir,
-          allowedPath,
+          basePath,
           ...filterOptions,
         })
       ) {

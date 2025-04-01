@@ -73,7 +73,7 @@ export const getTarballContents = async (context: {
   excludeExt?: string[];
   yamlFilter?: string;
   shouldOmitFiles?: boolean;
-  allowedPath?: string[];
+  basePath?: string[];
   includeDir?: string[];
   excludeDir?: string[];
   disableGenignore?: boolean;

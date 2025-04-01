@@ -75,7 +75,7 @@ export const pathFilter = (
     filePath,
     includeDir,
     includeExt,
-    allowedPath,
+    basePath,
     yamlParse,
     matchFilenames,
 
@@ -153,8 +153,8 @@ export const pathFilter = (
     (str.startsWith("/") ? "" : "/") + str + (str.endsWith("/") ? "" : "/");
   // passing this omits include/exclude dir but stil allows for ext filter
   const pathAllowed =
-    allowedPath && allowedPath.length > 0
-      ? allowedPath.some(
+    basePath && basePath.length > 0
+      ? basePath.some(
           (path) =>
             filePath.startsWith(surroundSlashes(path)) ||
             filePath + "/" === surroundSlashes(path),
