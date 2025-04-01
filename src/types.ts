@@ -1,5 +1,3 @@
-import { SwcFileParse } from "../swc/types.js";
-
 // src/streamers/types.ts
 export interface StreamHandlerOptions {
   shouldOmitFiles: boolean;
@@ -24,13 +22,6 @@ export interface FileEntry {
   imports?: null | { [path: string]: string[] };
   exportDefault?: string[];
   mainComment?: string;
-  /**swc-parse */
-  parse?: null | SwcFileParse;
-  /**swc parse for code-files, parsed to statements and imports */
-  data?: null | {
-    imports?: any[];
-    statements?: any[];
-  };
   matches?: string[][];
 }
 
