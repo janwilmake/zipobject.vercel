@@ -101,7 +101,7 @@ export const getZipballContents = async (context: {
   excludeExt?: string[];
   yamlFilter?: string;
   shouldOmitFiles: boolean;
-  allowedPaths?: string[];
+  allowedPath?: string[];
   includeDir?: string[];
   excludeDir?: string[];
   disableGenignore?: boolean;
@@ -113,7 +113,7 @@ export const getZipballContents = async (context: {
     immutable,
     excludeExt,
     includeExt,
-    allowedPaths,
+    allowedPath,
     includeDir,
     excludeDir,
     disableGenignore,
@@ -187,7 +187,7 @@ export const getZipballContents = async (context: {
         excludeExt,
         includeDir,
         excludeDir,
-        allowedPaths,
+        allowedPath,
       })
     ) {
       // console.log(entry.path, "should not include");
